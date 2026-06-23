@@ -1,9 +1,12 @@
+import os
 import random
 import pandas as pd
 
 random.seed(42)
 
-TARGET = 1000  # per class per language
+EASY_TARGET = 700   # easy/clear templates per class per language
+HARD_TARGET = 300   # ambiguous/hard templates per class per language
+TARGET = EASY_TARGET + HARD_TARGET  # 1000 total
 
 def fill(template, slots):
     s = template
@@ -11,17 +14,388 @@ def fill(template, slots):
         s = s.replace("{" + key + "}", random.choice(values), 1)
     return s
 
-def generate(templates, target=TARGET):
+def generate(templates, target):
     used, results = set(), []
     attempts = 0
-    while len(results) < target and attempts < target * 100:
+    while len(results) < target and attempts < target * 200:
         tmpl, slots = random.choice(templates)
         sentence = fill(tmpl, slots)
         if sentence not in used:
             used.add(sentence)
             results.append(sentence)
         attempts += 1
+    if len(results) < target:
+        print(f"  Warning: only generated {len(results)}/{target}")
     return results
+
+
+# ── Hard templates ── break keyword shortcuts by using emergency words in
+# benign context (Routine hard) and minimizing language for real emergencies
+# (Emergency hard) and borderline cases (Urgent hard).
+
+EN_EMERGENCY_HARD = [
+    # Atypical / minimized presentations — still true emergencies
+    ("Patient reports {vague} in {loc} for {dur}, {context}", {
+        "vague": ["mild discomfort","pressure","tightness","a funny feeling","an ache","heaviness"],
+        "loc": ["the chest","the jaw","the left arm","the upper back","the epigastric region"],
+        "dur": ["20 minutes","half an hour","the past hour","45 minutes","the last 30 minutes"],
+        "context": ["now sweating and pale","with new onset nausea","feeling lightheaded","arm feels weak","teeth are aching too"],
+    }),
+    ("Elderly {sex} who {denial} but {finding}", {
+        "sex": ["woman","man","patient","female","male"],
+        "denial": ["denies any chest pain","says it is nothing serious","refuses to lie down","insists they are fine","wants to go home"],
+        "finding": ["found to be diaphoretic","BP 80/50 on arrival","has been vomiting for one hour","is short of breath at rest","EMS reports witnessed loss of consciousness"],
+    }),
+    ("Sudden {s1} while {activity}, {s2}", {
+        "s1": ["extreme fatigue","profound weakness","dizziness","near-fainting","confusion"],
+        "activity": ["sitting quietly","watching television","lying in bed","eating dinner","talking on the phone"],
+        "s2": ["unable to stand","speech became slurred","right side of face drooped","lost vision in one eye briefly","could not lift left arm"],
+    }),
+    ("Patient brought by family who noticed {s1} and {s2} at home", {
+        "s1": ["slurred speech","confusion","inability to recognize them","one-sided weakness","unsteady gait suddenly"],
+        "s2": ["patient minimizing symptoms","patient insisting they are fine","patient refusing care","patient saying it will pass","patient asking to leave"],
+    }),
+    ("{s1} with {s2} — patient rates pain only {score} out of 10 but {finding}", {
+        "s1": ["Chest heaviness","Jaw discomfort","Arm tingling","Back pressure","Epigastric pain"],
+        "s2": ["mild nausea","slight sweating","some fatigue","feeling cold","shortness of breath on exertion"],
+        "score": ["3","4","2","3-4"],
+        "finding": ["EKG shows ST elevation","troponin elevated","BP 88/60","oxygen saturation 88%","patient is a diabetic with silent MI risk"],
+    }),
+]
+
+EN_URGENT_HARD = [
+    # Urgent cases using 'severe' or scary words — but not immediately life-threatening
+    ("{sev} dental pain with {s1} for {dur}", {
+        "sev": ["Severe","Excruciating","Extreme","Unbearable"],
+        "loc": ["lower jaw","upper molar","wisdom tooth area","right side of mouth"],
+        "s1": ["facial swelling","cheek swelling","trismus","difficulty opening mouth fully","submandibular swelling"],
+        "dur": ["2 days","3 days","since yesterday","48 hours","24 hours"],
+    }),
+    ("Severe {type} pain rated {score}/10 with {s1}, {s2}", {
+        "type": ["flank","side","back","rib","lower back"],
+        "score": ["8","9","9-10","8-9"],
+        "s1": ["nausea","vomiting once","sweating","restlessness"],
+        "s2": ["colicky in nature","comes in waves","patient pacing the room","unable to find comfortable position","radiating to groin"],
+    }),
+    ("{age} with {condition} presenting with {s1} and {s2} — vitals stable", {
+        "age": ["55-year-old","62-year-old","48-year-old","70-year-old"],
+        "condition": ["controlled hypertension","known COPD","type 2 diabetes","history of kidney stones"],
+        "s1": ["worsening shortness of breath for 2 days","increased wheezing","productive cough with green sputum","burning chest discomfort on exertion"],
+        "s2": ["no ST changes on EKG","troponin negative","oxygen 94%","temperature 38.5C","blood pressure 150/95"],
+    }),
+    ("Sudden severe {s1} after {trigger}, {s2}", {
+        "s1": ["eye pain","vision change in one eye","red eye","eye discharge"],
+        "trigger": ["chemical splash","foreign body entry","welding flash","sun exposure","contact lens use"],
+        "s2": ["photophobia present","tearing heavily","visual acuity reduced","cornea appears cloudy","significant pain with movement"],
+    }),
+    ("Chest pain {char} for {dur} — {context}", {
+        "char": ["reproducible with palpation","worsened by deep breath","positional","pleuritic","sharp and stabbing"],
+        "dur": ["2 days","3 days","one day","since this morning"],
+        "context": ["troponin pending","EKG normal so far","no radiation","no diaphoresis","vital signs stable but pain 8/10"],
+    }),
+]
+
+EN_ROUTINE_HARD = [
+    # Routine cases using emergency-sounding words in clearly benign context
+    ("History of {condition} — currently {status}, here for {reason}", {
+        "condition": ["stroke three years ago, fully recovered","heart attack two years ago, now asymptomatic",
+                      "COPD, well controlled on inhaler","hypertension, on medication","diabetes, well managed"],
+        "status": ["feeling well","completely asymptomatic","stable on current medications","doing well",
+                   "no new symptoms","back to normal activities","no complaints"],
+        "reason": ["routine medication refill","annual check-up","blood pressure check","follow-up labs","prescription renewal"],
+    }),
+    ("Chest wall {type} that {char} — {context}", {
+        "type": ["pain","soreness","tenderness","discomfort"],
+        "char": ["is reproducible with palpation","worsens with certain movements","appeared after exercise",
+                 "is tender to touch","came on after carrying heavy bags","started after coughing"],
+        "context": ["no shortness of breath","no diaphoresis","pain clearly musculoskeletal","no radiation","vital signs normal","no cardiac risk factors"],
+    }),
+    ("Mild shortness of breath that {char} — {context}", {
+        "char": ["resolved completely on arrival","improved with rest","comes only with 4 flights of stairs",
+                 "has been present for months unchanged","patient is a smoker, chronic baseline"],
+        "context": ["oxygen saturation 99%","no acute distress","lungs clear to auscultation","no chest pain","no recent change from baseline","patient feels well now"],
+    }),
+    ("Patient concerned about {scary_symptom} but on evaluation {finding}", {
+        "scary_symptom": ["chest pain","difficulty breathing","fast heartbeat","arm numbness","headache"],
+        "finding": ["pain is musculoskeletal and reproducible","oxygen 99% and lungs clear","heart rate 78 and regular",
+                    "sensation is tingling from sleeping on arm, resolved","tension headache responding to ibuprofen",
+                    "anxiety-related symptoms, vitals normal","no objective findings","palpitations lasted seconds only"],
+    }),
+    ("{qual} headache — {context} — no {s1}", {
+        "qual": ["Mild","Dull","Tension-type","Mild bilateral","Frontal"],
+        "context": ["similar to usual migraines","same as previous episodes","patient recognizes pattern",
+                    "started after long screen time","after skipping meals today","stress-related"],
+        "s1": ["vomiting","fever","neck stiffness","vision changes","sudden onset","worst-ever quality"],
+    }),
+]
+
+ES_EMERGENCY_HARD = [
+    ("Paciente refiere {vague} en {loc} desde hace {dur}, {context}", {
+        "vague": ["leve molestia","presion","tension","sensacion rara","pesadez"],
+        "loc": ["el pecho","la mandibula","el brazo izquierdo","la espalda","el epigastrio"],
+        "dur": ["20 minutos","media hora","la ultima hora","45 minutos"],
+        "context": ["ahora sudando y palido","con nauseas nuevas","mareado","brazo debil","dolor dental tambien"],
+    }),
+    ("Anciano {sex} que {denial} pero {finding}", {
+        "sex": ["mujer","hombre","paciente","senora","senor"],
+        "denial": ["niega dolor en el pecho","dice que no es nada grave","quiere irse a casa","insiste en que esta bien"],
+        "finding": ["esta diaforetico","PA 80/50 al llegar","ha vomitado una hora","tiene disnea en reposo","paramedicos reportan perdida de conocimiento"],
+    }),
+    ("Debilidad subita {s1} mientras {activity}, {s2}", {
+        "s1": ["extrema","profunda","marcada","repentina"],
+        "activity": ["estaba sentado","veia television","estaba en cama","estaba cenando","estaba hablando"],
+        "s2": ["incapaz de ponerse de pie","habla incoherente","lado derecho del rostro cayo","perdio vision en un ojo brevemente","no pudo levantar el brazo izquierdo"],
+    }),
+    ("Familia llevo al paciente por {s1} y {s2} en casa", {
+        "s1": ["habla incoherente","confusion","debilidad de un lado","marcha inestable subita"],
+        "s2": ["paciente minimiza sintomas","paciente insiste en que esta bien","paciente se niega a recibir atencion"],
+    }),
+    ("{s1} con {s2} — paciente valora dolor solo {score} de 10 pero {finding}", {
+        "s1": ["Pesadez en el pecho","Molestia en la mandibula","Hormigueo en el brazo","Presion en la espalda"],
+        "s2": ["leve nausea","sudoracion leve","algo de fatiga","sensacion de frio"],
+        "score": ["3","4","2","3-4"],
+        "finding": ["EKG muestra elevacion del ST","troponina elevada","PA 88/60","saturacion de oxigeno 88%"],
+    }),
+]
+
+ES_URGENT_HARD = [
+    ("{sev} dolor dental con {s1} desde hace {dur}", {
+        "sev": ["Severo","Intenso","Insoportable","Muy fuerte"],
+        "s1": ["hinchazon facial","hinchazon de mejilla","trismo","dificultad para abrir la boca","hinchazon submandibular"],
+        "dur": ["2 dias","3 dias","desde ayer","48 horas"],
+    }),
+    ("Dolor {type} intenso {score}/10 con {s1} y {s2}", {
+        "type": ["en flanco","lateral","lumbar","costal"],
+        "score": ["8","9","8-9"],
+        "s1": ["nauseas","vomito unico","sudoracion","inquietud"],
+        "s2": ["de caracter colico","que va y viene","irradia a la ingle","no encuentra posicion comoda"],
+    }),
+    ("Paciente con {condition} con {s1} y {s2} — signos vitales estables", {
+        "condition": ["HTA controlada","EPOC conocido","diabetes tipo 2"],
+        "s1": ["disnea que empeora desde hace 2 dias","sibilancias en aumento","tos productiva con esputo verde"],
+        "s2": ["sin cambios en EKG","troponina negativa","saturacion 94%","temperatura 38.5C"],
+    }),
+    ("Dolor de {s1} subito tras {trigger}, {s2}", {
+        "s1": ["ojo","vision en un ojo","ojo rojo"],
+        "trigger": ["salpicadura quimica","cuerpo extrano","destello de soldadura","uso de lentes de contacto"],
+        "s2": ["fotofobia presente","lagrimeo abundante","agudeza visual reducida","dolor con los movimientos oculares"],
+    }),
+    ("Dolor toracico {char} desde hace {dur} — {context}", {
+        "char": ["reproducible con palpacion","empeora con inspiracion profunda","posicional","pleuritico","punzante"],
+        "dur": ["2 dias","3 dias","desde esta manana"],
+        "context": ["troponina pendiente","EKG normal por ahora","sin irradiacion","sin diaforesis","signos vitales estables"],
+    }),
+]
+
+ES_ROUTINE_HARD = [
+    ("Antecedente de {condition} — actualmente {status}, consulta por {reason}", {
+        "condition": ["ACV hace tres anos totalmente recuperado","infarto hace dos anos sin sintomas actuales",
+                      "EPOC bien controlado con inhalador","hipertension con medicacion","diabetes bien controlada"],
+        "status": ["se encuentra bien","completamente asintomatico","estable con medicacion actual","sin nuevas quejas"],
+        "reason": ["renovacion de receta","chequeo anual","control de tension arterial","analisis de seguimiento"],
+    }),
+    ("Dolor de pared toracica que {char} — {context}", {
+        "char": ["es reproducible con palpacion","empeora con ciertos movimientos","aparecio tras ejercicio","duele al tocar"],
+        "context": ["sin dificultad respiratoria","sin diaforesis","claramente musculoesqueletico","sin irradiacion","signos vitales normales"],
+    }),
+    ("Leve dificultad respiratoria que {char} — {context}", {
+        "char": ["se resolvio al llegar","mejoro con reposo","solo aparece al subir 4 pisos","lleva meses igual sin cambios"],
+        "context": ["saturacion 99%","sin dificultad aguda","pulmones limpios","sin dolor en el pecho","sin cambio respecto a la situacion basal"],
+    }),
+    ("Paciente preocupado por {scary_symptom} pero en la evaluacion {finding}", {
+        "scary_symptom": ["dolor en el pecho","dificultad para respirar","corazon acelerado","entumecimiento del brazo","cefalea"],
+        "finding": ["el dolor es musculoesqueletico y reproducible","saturacion 99% y pulmones limpios",
+                    "ritmo cardiaco 78 y regular","hormigueo por dormir sobre el brazo ya resuelto",
+                    "cefalea tensional que cede con ibuprofeno","sintomas por ansiedad con signos vitales normales"],
+    }),
+    ("Cefalea {qual} — {context} — sin {s1}", {
+        "qual": ["leve","sorda","tensional","bilateral leve","frontal","occipital leve","pulsatil leve"],
+        "context": ["similar a sus migranas habituales","igual que episodios previos","tras larga jornada frente a pantalla",
+                    "por saltarse las comidas","despues de estres laboral","por deshidratacion leve","tras dormir mal"],
+        "s1": ["vomitos","fiebre","rigidez de nuca","cambios visuales","inicio subito","intensidad maxima","fotofobia"],
+    }),
+    ("Paciente refiere {s1} leve que {char} — {context}", {
+        "s1": ["fatiga","cansancio","malestar general","debilidad leve","somnolencia"],
+        "char": ["mejora con reposo","cede con vitaminas","ha mejorado esta semana","es habitual en el","es habitual en ella"],
+        "context": ["sin fiebre","sin perdida de peso","analisis recientes normales","sin linfadenopatias","exploracion normal","sin cambios recientes"],
+    }),
+]
+
+HI_EMERGENCY_HARD = [
+    ("Mariz ne bataya {vague} {loc} mein {dur} se, {context}", {
+        "vague": ["halka sa dard","dabaav","khinchav","anjaani feeling","bhaari pan"],
+        "loc": ["seene mein","jawde mein","baaye haath mein","peethe mein","upar pet mein"],
+        "dur": ["20 minute","aadhe ghante","pichle ghante","45 minute"],
+        "context": ["ab pasina aa raha hai aur chehre par palor","nai matli ke saath","chakkar aa rahe hain","haath kamzor ho gaya hai","daant mein bhi dard hai"],
+    }),
+    ("Bujurg {sex} jo {denial} lekin {finding}", {
+        "sex": ["mahila","purush","mariz","behen","bhai"],
+        "denial": ["seene mein koi dard nahi kehte","kehte hai kuch serious nahi","ghar jaana chahte hain","theek hone ka dawa karte hain"],
+        "finding": ["pasina bahut aa raha hai","BP 80/50 milaa","ek ghante se ulti ho rahi hai","aaram se saans nahi le pa rahe","ambulance waale ne battaya ke behosh ho gaye the"],
+    }),
+    ("Achanak {s1} jab {activity} kar rahe the, {s2}", {
+        "s1": ["bahut thakaan","bahut kamzori","chakkar","behoshi jaisi feeling","ghabrahat"],
+        "activity": ["chup baithe the","TV dekh rahe the","lete hue the","khaana kha rahe the","baat kar rahe the"],
+        "s2": ["khade nahi ho sake","bolne mein ladkhalahat aayi","chehre ka daahina hissa latka","ek aankhon se kuch der ke liye nahi dikha","baaya haath uthaa nahi pa rahe"],
+    }),
+    ("Parivaar ne laaya mariz ko ghar mein {s1} aur {s2} dekhkar", {
+        "s1": ["bolne mein ladkhalahat","bheega hua confusion","ek taraf kamzori","achanak dhandhla chalna"],
+        "s2": ["mariz khud theek bol raha hai","mariz treatment se mana kar raha hai","mariz ghar jaana chahta hai","mariz kehta hai apne aap theek ho jaayega"],
+    }),
+    ("{s1} aur {s2} ke saath — mariz dard sirf {score} mein se bata raha lekin {finding}", {
+        "s1": ["Seene mein bhaari pan","Jawde mein halki takleef","Haath mein jhunjhunahat","Peethe mein dabaav"],
+        "s2": ["halki matli","thoda sa pasina","thakaan"],
+        "score": ["3","4","2"],
+        "finding": ["EKG mein ST elevation hai","troponin badhi hui hai","BP 88/60 hai","oxygen 88 percent"],
+    }),
+]
+
+HI_URGENT_HARD = [
+    ("{sev} daant ka dard {s1} ke saath {dur} se", {
+        "sev": ["Bahut tez","Asahniya","Bahut gambhir","Aniyantrit"],
+        "s1": ["chehra sujan gaya","gaala sujan gaya","muh kam khul raha","dono jagah sujan"],
+        "dur": ["2 din","3 din","kal se","48 ghante"],
+    }),
+    ("{type} mein bahut tez dard {score}/10 {s1} aur {s2} ke saath", {
+        "type": ["kamar","ek taraf","pet ki taraf","paanch ki taraf"],
+        "score": ["8","9","9-10"],
+        "s1": ["matli","ek baar ulti","pasina","chain nahi"],
+        "s2": ["lehriyaan aati hain","aa jaa karta hai","groyn tak failta hai","koi position aaramdaayak nahi"],
+    }),
+    ("{age} mariz jo {condition} ka {s1} aur {s2} — vital signs stable", {
+        "age": ["55 saal ke","62 saal ke","48 saal ke","70 saal ke"],
+        "condition": ["controlled BP ka","COPD ka","diabetes 2 ka"],
+        "s1": ["2 din se saans fulna badh gaya","seeti ki awaaz zyada","haari balgam"],
+        "s2": ["EKG mein koi badlaav nahi","troponin negative","oxygen 94 percent","temperature 38.5C"],
+    }),
+    ("Achanak {s1} {trigger} ke baad, {s2}", {
+        "s1": ["aankhon mein dard","aankhon mein roshni","aankhon mein lali"],
+        "trigger": ["chemical khule","aankhon mein kuch pada","welding ki roshni","contact lens se"],
+        "s2": ["roshni se takleef","aankhon se paani","drishti thodi kami","aankhon ko hilane mein dard"],
+    }),
+    ("Seene mein dard {char} {dur} se — {context}", {
+        "char": ["dabane se aata hai","gehri saans se badhtaa","position pe depend karta","ek taraf ka"],
+        "dur": ["2 din","3 din","aaj subah se"],
+        "context": ["troponin aaya nahi abhi","EKG theek hai abhi tak","kahin nahi jaata dard","pasina nahi","vital signs theek hain"],
+    }),
+]
+
+HI_ROUTINE_HARD = [
+    ("{condition} ki history — abhi {status}, aaye hain {reason} ke liye", {
+        "condition": ["3 saal pehle stroke tha poori tarah theek","2 saal pehle heart attack tha ab koi lakshan nahi",
+                      "COPD hai inhaler se control mein","BP hai dawa se control","diabetes hai theek manage"],
+        "status": ["bilkul theek","koi lakshan nahi","dawa se stable","sab kuch theek","koi nayi takleef nahi"],
+        "reason": ["dawa diwane","routine check-up","BP check","test karwane","prescription renew"],
+    }),
+    ("Seene ki deewar mein {type} jo {char} — {context}", {
+        "type": ["dard","pida","takleef","bhaaripan"],
+        "char": ["dabane se aata hai","kuch harakaton se badhtaa","vyayam ke baad shuru hua","haath lagane se dard"],
+        "context": ["saans lene mein koi takleef nahi","pasina nahi","clearly musculoskeletal","kahin nahi jaata","vital signs normal"],
+    }),
+    ("Halka saans fulna jo {char} — {context}", {
+        "char": ["aate hi theek ho gaya","aaram se theek ho gaya","4 manzil chadne par hi hota","mahino se aisa hi hai koi badlaav nahi"],
+        "context": ["oxygen 99 percent","koi acute distress nahi","saans ki awaaz saaf","seene mein dard nahi","baseline se koi fark nahi"],
+    }),
+    ("Mariz {scary_symptom} se dara tha lekin jaanch mein {finding}", {
+        "scary_symptom": ["seene mein dard","saans lene mein takleef","dil ki dhadkan tez","haath mein jhunjhunahat","sardard"],
+        "finding": ["muscular dard hai aur dabane se milta hai","oxygen 99 aur saans bilkul saaf",
+                    "dhadkan 78 aur regular","haath ke neechle hisse par sone se tha ab theek","tension headache ibuprofen se theek hua",
+                    "anxiety se related koi objective finding nahi"],
+    }),
+    ("{qual} sardard — {context} — koi {s1} nahi", {
+        "qual": ["Halka","Sust","Tension wala","Dono taraf halka","Aage ki taraf"],
+        "context": ["pehle bhi aise hota tha","baar baar aisa hota hai","zyada der screen dekhne se","khaana chhodne se"],
+        "s1": ["ulti","bukhar","gardan mein akadahat","najar mein badlaav","achanak shuru","jeevan ka sabse bada"],
+    }),
+]
+
+BN_EMERGENCY_HARD = [
+    ("Rogir bolle {vague} {loc} e {dur} dhore, {context}", {
+        "vague": ["halka batha","chaap","khinchano","anjaana anubhab","bhari batha"],
+        "loc": ["buke","chomale","bam hate","pitthe","pete upar"],
+        "dur": ["20 minute","adha ghanta","shesh ghanta dhore","45 minute"],
+        "context": ["ekhon ghaam hochhe o mukh shada hochhe","notun bomi bomi bhab er shathe","matha ghurochhe","haat durbolo hoyeche","dant e o batha achhe"],
+    }),
+    ("Brishkhor {sex} je {denial} kintu {finding}", {
+        "sex": ["mahila","purush","rogi","didimoni","dadamoni"],
+        "denial": ["buke kono batha nei bolen","bolen kono shomoshsha nei","barite jete chan","thik achen bolen"],
+        "finding": ["ghaam hochhe o chaara hochhe","BP 80/50 pelam","ek ghanta dhore bomi hochhe","bishire shas nite parchhen na","ambulance bollen je ajnaan hoye gechen"],
+    }),
+    ("Hothat {s1} jakhon {activity} korchhilen, {s2}", {
+        "s1": ["onek thaka","prochur durbolta","matha ghora","ajnaan er moto","ghabarani"],
+        "activity": ["chup boshe chilen","television dekhchilen","shue chilen","raat er khana khachilen","kotha bolchilen"],
+        "s2": ["darate parchhen na","kotha joriye geche","mukher dan dik jhule porche","ek chokhe kichu kshhoner jonne dekha geche na","bam haat tulte parchhen na"],
+    }),
+    ("Poribar niye eseche karon badi te {s1} o {s2} dekheche", {
+        "s1": ["kotha joriye jachhhe","gholano confusion","ek dike durbolta","hothat dhandhla hata"],
+        "s2": ["rogi nijeye thik bolen","rogi chikitsha nite raji na","rogi barite jete chan","rogi bolen nije theek hoye jabe"],
+    }),
+    ("{s1} o {s2} er shathe — rogi batha shudhu {score} bolen kintu {finding}", {
+        "s1": ["Buke bhari laagchhe","Chomale halka batha","Hate jhimjhim","Pitthe chaap"],
+        "s2": ["halka bomi bomi bhab","thoda ghaam","thaka laagchhe"],
+        "score": ["3","4","2"],
+        "finding": ["EKG e ST elevation achhe","troponin barche","BP 88/60","oxygen 88 percent"],
+    }),
+]
+
+BN_URGENT_HARD = [
+    ("{sev} danter batha {s1} er shathe {dur} dhore", {
+        "sev": ["Khub tez","Ashoho","Otyonto","Atyanto beshi"],
+        "s1": ["mukh fulon gechhe","gaal fulon gechhe","muh kom khulchhe","dui dike fulon"],
+        "dur": ["dui din","tin din","gotokal theke","48 ghanta"],
+    }),
+    ("{type} te khub beshi batha {score}/10 {s1} o {s2} er shathe", {
+        "type": ["kaanghare","ek dike","pete dike","paash e"],
+        "score": ["8","9","9-10"],
+        "s1": ["bomi bomi bhab","ekbar bomi hoyeche","ghaam hochhe","ashantho"],
+        "s2": ["dhole dhole ase","aase jaye","groyne chharhiye jachhhe","kono obosthane aaram nai"],
+    }),
+    ("{age} rogi je {condition} er {s1} o {s2} — vital signs stable", {
+        "age": ["55 bochhorer","62 bochhorer","48 bochhorer","70 bochhorer"],
+        "condition": ["controlled BP er","COPD er","type 2 diabetes er"],
+        "s1": ["dui din dhore shas fulanor beshi","ghanghor seetir awaaz","shobuj balgom er kashi"],
+        "s2": ["EKG e kono badlaav nei","troponin negative","oxygen 94 percent","temperature 38.5C"],
+    }),
+    ("Hothat {s1} {trigger} er pore, {s2}", {
+        "s1": ["chokhe batha","chokhe alo","chokh laal"],
+        "trigger": ["chemical chhite porle","chokhe kichu porle","welding er alo theke","contact lens er karone"],
+        "s2": ["aloy koshto hochhe","chokh theke paani porhchhe","drishti kom hochhe","chokh holatei batha hochhe"],
+    }),
+    ("Buke batha {char} {dur} dhore — {context}", {
+        "char": ["chaap dilei hochhe","ghono shas nile barhchhe","position er upor norbhor kore","ek dike"],
+        "dur": ["dui din","tin din","shokal theke"],
+        "context": ["troponin esheni ekhono","EKG thik ache ekhono porjonto","kothao jachhhe na batha","ghaam hochhe na","vital signs thik ache"],
+    }),
+]
+
+BN_ROUTINE_HARD = [
+    ("{condition} er itihas achhe — ekhon {status}, eshechen {reason} er jonne", {
+        "condition": ["tin bochhorer aage stroke hoyechilo pooro shoree thik","dui bochhorer aage heart attack ekhon kono laakhhon nei",
+                      "COPD achhe inhaler e theek ache","BP achhe dawa te niyontrone","diabetes achhe theek manage"],
+        "status": ["bhalo achhen","kono laakhhon nei","dawa te stable","shob theek","kono notun koshto nei"],
+        "reason": ["dawa neoar","routine check","BP dekhar","test korar","prescription noboyon"],
+    }),
+    ("Buker deoale {type} je {char} — {context}", {
+        "type": ["batha","peeda","koshto","bhari laagchhe"],
+        "char": ["chaap dilei hochhe","kono kaje barhchhe","byayam er pore shuru hoyeche","haath lagale batha"],
+        "context": ["shas neoay kono koshto nei","ghaam hochhe na","shoshposhto musculoskeletal","kothao jachhhe na","vital signs normal"],
+    }),
+    ("Halka shas fulano je {char} — {context}", {
+        "char": ["ese thikthak hoe gechhe","bishrame theek hoe gechhe","4 tala uthlei hoy shudhu","moaser por theke emon konodin badhaay ni"],
+        "context": ["oxygen 99 percent","kono acute koshto nei","shas er awaaz porishtho","buke batha nei","baseline theke kono pariborton nei"],
+    }),
+    ("Rogi {scary_symptom} niye chintiyo chilen kintu parikkkhay {finding}", {
+        "scary_symptom": ["buke batha","shas neoay koshto","dil tez dhukchhe","hate jhimjhim","mathabatha"],
+        "finding": ["muscular batha chaap dilei hochhe","oxygen 99 o shas porishtho",
+                    "heart rate 78 o regular","ghume hate shuye thaka theke jhimjhim ekhon theek",
+                    "tension mathabatha paracetamol e kome gechhe","anxiety theke vital signs thik"],
+    }),
+    ("{qual} mathabatha — {context} — kono {s1} nei", {
+        "qual": ["Halka","Sust","Tension er","Dui dike halka","Shmukhe"],
+        "context": ["ageo erokomo hoto","baar baar hochhe","onek kkhhon screen er shamne"],
+        "s1": ["bomi","jor","gharer shoktohat","drishti badlaav","hothat shuru","jiboner shobcheye kharap"],
+    }),
+]
 
 # ═══════════════════════════════════════════════════════════════
 #  ENGLISH
@@ -1001,34 +1375,48 @@ BN_ROUTINE = [
 #  GENERATE ALL
 # ═══════════════════════════════════════════════════════════════
 
-LABEL2ID = {"Routine": 0, "Urgent": 1, "Emergency": 2}
-
+# ── Config: (easy_templates, hard_templates, label, language) ──
 configs = [
-    (EN_EMERGENCY, "Emergency", "English"),
-    (EN_URGENT,    "Urgent",    "English"),
-    (EN_ROUTINE,   "Routine",   "English"),
-    (ES_EMERGENCY, "Emergency", "Spanish"),
-    (ES_URGENT,    "Urgent",    "Spanish"),
-    (ES_ROUTINE,   "Routine",   "Spanish"),
-    (HI_EMERGENCY, "Emergency", "Hindi"),
-    (HI_URGENT,    "Urgent",    "Hindi"),
-    (HI_ROUTINE,   "Routine",   "Hindi"),
-    (BN_EMERGENCY, "Emergency", "Bengali"),
-    (BN_URGENT,    "Urgent",    "Bengali"),
-    (BN_ROUTINE,   "Routine",   "Bengali"),
+    (EN_EMERGENCY, EN_EMERGENCY_HARD, "Emergency", "English"),
+    (EN_URGENT,    EN_URGENT_HARD,    "Urgent",    "English"),
+    (EN_ROUTINE,   EN_ROUTINE_HARD,   "Routine",   "English"),
+    (ES_EMERGENCY, ES_EMERGENCY_HARD, "Emergency", "Spanish"),
+    (ES_URGENT,    ES_URGENT_HARD,    "Urgent",    "Spanish"),
+    (ES_ROUTINE,   ES_ROUTINE_HARD,   "Routine",   "Spanish"),
+    (HI_EMERGENCY, HI_EMERGENCY_HARD, "Emergency", "Hindi"),
+    (HI_URGENT,    HI_URGENT_HARD,    "Urgent",    "Hindi"),
+    (HI_ROUTINE,   HI_ROUTINE_HARD,   "Routine",   "Hindi"),
+    (BN_EMERGENCY, BN_EMERGENCY_HARD, "Emergency", "Bengali"),
+    (BN_URGENT,    BN_URGENT_HARD,    "Urgent",    "Bengali"),
+    (BN_ROUTINE,   BN_ROUTINE_HARD,   "Routine",   "Bengali"),
 ]
 
-rows = []
-for templates, label, language in configs:
-    sentences = generate(templates, TARGET)
-    print(f"{language:<10} {label:<12} → {len(sentences)} samples")
-    for s in sentences:
-        rows.append({"text": s, "label": label, "language": language})
+os.makedirs("dataset", exist_ok=True)
 
-df = pd.DataFrame(rows)
-print(f"\nTotal rows: {len(df)}")
+all_rows = []
+lang_frames = {}
+
+for easy_tmpl, hard_tmpl, label, language in configs:
+    easy = generate(easy_tmpl, EASY_TARGET)
+    hard = generate(hard_tmpl, HARD_TARGET)
+    combined = easy + hard
+    random.shuffle(combined)
+    print(f"{language:<10} {label:<12} → {len(easy)} easy + {len(hard)} hard = {len(combined)}")
+    for s in combined:
+        row = {"text": s, "label": label, "language": language}
+        all_rows.append(row)
+        if language not in lang_frames:
+            lang_frames[language] = []
+        lang_frames[language].append(row)
+
+# Save per-language CSVs to dataset/
+for language, rows in lang_frames.items():
+    lang_df = pd.DataFrame(rows)
+    lang_df = lang_df.sample(frac=1, random_state=42).reset_index(drop=True)
+    out_path = os.path.join("dataset", f"{language}.csv")
+    lang_df.to_csv(out_path, index=False)
+    print(f"Saved {out_path}: {len(lang_df)} rows")
+
+df = pd.DataFrame(all_rows)
+print(f"\nTotal: {len(df)} rows")
 print(df.groupby(["language","label"])["text"].count().unstack())
-
-out = "mist_dataset.csv"
-df.to_csv(out, index=False)
-print(f"\nSaved to {out}")
