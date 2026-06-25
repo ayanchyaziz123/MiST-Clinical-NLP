@@ -4,8 +4,8 @@ import pandas as pd
 
 random.seed(42)
 
-EASY_TARGET = 700   # easy/clear templates per class per language
-HARD_TARGET = 300   # ambiguous/hard templates per class per language
+EASY_TARGET = 200   # easy/clear templates per class per language
+HARD_TARGET = 800   # ambiguous/hard templates per class per language
 TARGET = EASY_TARGET + HARD_TARGET  # 1000 total
 
 def fill(template, slots):
@@ -61,6 +61,63 @@ EN_EMERGENCY_HARD = [
         "score": ["3","4","2","3-4"],
         "finding": ["EKG shows ST elevation","troponin elevated","BP 88/60","oxygen saturation 88%","patient is a diabetic with silent MI risk"],
     }),
+    ("I have been having {s1} in my {loc} for about {dur} and I just {s2}", {
+        "s1": ["this weird pressure","a tight feeling","some heaviness","a dull ache","this squeezing sensation"],
+        "loc": ["chest","left arm","jaw","upper back","stomach"],
+        "dur": ["20 minutes","half an hour","45 minutes","an hour"],
+        "s2": ["cannot seem to shake it","feel nauseous now","started sweating","feel really weak","cannot catch my breath"],
+    }),
+    ("Family called 911 — patient {s1} at home, now {s2}", {
+        "s1": ["started speaking strangely","could not get up from the floor","went pale and sat down suddenly","was staring blankly","dropped whatever they were holding"],
+        "s2": ["confused and not recognizing family","right arm not moving normally","slumping to one side","BP 80 on arrival","unresponsive to verbal commands"],
+    }),
+    ("While {setting}, patient suddenly {s1} and {s2} — appears {s3}", {
+        "setting": ["waiting in triage","sitting in the lobby","walking to the exam room","in the parking lot"],
+        "s1": ["sat down on the floor","became very pale","began sweating profusely","stopped talking mid-sentence"],
+        "s2": ["said their back hurt","mentioned feeling very tired","said their arm felt heavy","complained of indigestion"],
+        "s3": ["diaphoretic and pale","confused and disoriented","clutching their chest","short of breath at rest"],
+    }),
+    ("EMS brought in {age} found {state} — {s1} and {s2}", {
+        "age": ["young man","young woman","middle-aged male","teenager","unknown-age patient"],
+        "state": ["unresponsive in bathroom","slumped in a chair","barely responsive in a park","lying on apartment floor"],
+        "s1": ["pinpoint pupils","breathing once every 10 seconds","cyanotic lips"],
+        "s2": ["oxygen saturation 72%","heart rate 48","does not respond to sternal rub","gurgling respirations"],
+    }),
+    ("{age} arrived short of breath — {s1} and {s2}, also noting {s3}", {
+        "age": ["42-year-old","55-year-old","38-year-old","67-year-old"],
+        "s1": ["sudden onset 30 minutes ago","woke from sleep unable to breathe","felt fine then suddenly could not breathe"],
+        "s2": ["oxygen 85%","heart rate 128","using every muscle to breathe"],
+        "s3": ["leg swelling for one week","just returned from a 14-hour flight","had surgery 3 weeks ago","been bedbound recovering"],
+    }),
+    ("Diabetic patient who {s1} — now {s2} and {s3}", {
+        "s1": ["ran out of insulin 3 days ago","could not take insulin due to vomiting","has had flu symptoms for 2 days"],
+        "s2": ["breathing very fast and deeply","glucose 550 on fingerstick","confused and very drowsy"],
+        "s3": ["BP dropping","dry mucous membranes","extreme weakness","vomiting repeatedly"],
+    }),
+    ("{age} with {hx} — here for {chief}, but found to have {findings}", {
+        "age": ["85-year-old","72-year-old","elderly male","elderly female"],
+        "hx": ["recurrent UTI","surgery last week","known COPD","urinary catheter"],
+        "chief": ["feeling unwell since yesterday","not eating for 2 days","confusion this morning","extreme weakness"],
+        "findings": ["fever 40C and BP 82/50","heart rate 122 and RR 28","mottled skin and confusion","lactate 4.8"],
+    }),
+    ("Patient came in dizzy and weak — {s1} and {s2}, also {s3}", {
+        "s1": ["black tarry stools for 2 days","vomited dark red material at home","red blood in toilet twice today"],
+        "s2": ["BP 88/56 in triage","heart rate 118","pale and sweating"],
+        "s3": ["takes aspirin and ibuprofen daily","on warfarin for atrial fibrillation","known liver disease"],
+    }),
+    ("{age} brought in by {person} — {s1}, {s2}, started {onset}", {
+        "age": ["19-year-old college student","22-year-old","teenager"],
+        "person": ["roommate","parents","friend","campus security"],
+        "s1": ["cannot tolerate any light in the room","neck so stiff they cannot touch chin to chest","severe headache woke them from sleep"],
+        "s2": ["confusion and irritability","non-blanching rash on chest","temperature 40.2C","vomiting since early morning"],
+        "onset": ["overnight","very suddenly","4 hours ago","this morning"],
+    }),
+    ("Woman {age} with {s1} — {s2} and {s3}", {
+        "age": ["in her twenties","28 years old","32 years old","mid-twenties"],
+        "s1": ["missed period 6 weeks ago","positive pregnancy test last week","possibly 7 weeks pregnant"],
+        "s2": ["sudden sharp pain right side of abdomen","collapsed in the bathroom","BP 78/50 on arrival"],
+        "s3": ["referred shoulder-tip pain","abdomen rigid and tender","HR 132 and dropping BP","peritoneal signs on exam"],
+    }),
 ]
 
 EN_URGENT_HARD = [
@@ -92,6 +149,57 @@ EN_URGENT_HARD = [
         "char": ["reproducible with palpation","worsened by deep breath","positional","pleuritic","sharp and stabbing"],
         "dur": ["2 days","3 days","one day","since this morning"],
         "context": ["troponin pending","EKG normal so far","no radiation","no diaphoresis","vital signs stable but pain 8/10"],
+    }),
+    ("Came in unable to sit still — {s1} radiating to {loc}, {s2}", {
+        "s1": ["pain that comes in waves","cramping pain","colicky pain","constant pain that spikes"],
+        "loc": ["the groin","the right side","the inner thigh","the testicle"],
+        "s2": ["nausea throughout","vomited once in the car","cannot find a comfortable position","pacing since arrival"],
+    }),
+    ("Fever of {temp} with {s1} — {s2}", {
+        "temp": ["102.8F","103.2F","39.6C","103F"],
+        "s1": ["chills since morning","aching all over","not eating since yesterday","sleeping most of the day"],
+        "s2": ["can drink fluids","partially responds to ibuprofen","no confusion","chest clear on exam"],
+    }),
+    ("Pain that {s1} — now {s2} — no appetite since {time}", {
+        "s1": ["started around the belly button","was diffuse yesterday","began centrally and moved right"],
+        "s2": ["settled in the right lower abdomen","is worse with any movement","woke them up at 3am"],
+        "time": ["yesterday morning","this morning","lunchtime today","last night"],
+    }),
+    ("{age} child — {s1} for {dur} with {s2}", {
+        "age": ["3-year-old","5-year-old","18-month-old","7-year-old"],
+        "s1": ["fever of 39.5C","not eaten much","running a high fever","very irritable"],
+        "dur": ["2 days","3 days","since yesterday"],
+        "s2": ["pulling at ear","no wet nappies since morning","less playful than usual","feverish and clingy"],
+    }),
+    ("After {trigger} — developed {s1} — {s2}", {
+        "trigger": ["eating at a new restaurant","starting a new antibiotic","touching a cat","wearing a new bracelet"],
+        "s1": ["hives across the chest and arms","swelling of the lips","facial swelling and itching","large welts on the back"],
+        "s2": ["breathing fine","no throat tightening","voice unchanged","oxygen 99%"],
+    }),
+    ("{mechanism} — now {s1} — {s2}", {
+        "mechanism": ["Fell on outstretched hand","Twisted ankle stepping off a curb","Hit arm on door frame","Landed awkwardly from a step"],
+        "s1": ["wrist swollen and tender","ankle bruised and swollen","hand looks deformed","cannot put weight on it"],
+        "s2": ["pain 7/10","immediate swelling","visible deformity","ecchymosis developing rapidly"],
+    }),
+    ("Burning when urinating for {dur} — now {s1} and {s2}", {
+        "dur": ["3 days","2 days","since yesterday"],
+        "s1": ["developed a fever this morning","back pain started today","shivering since this afternoon"],
+        "s2": ["temperature 38.8C","costovertebral angle tenderness","nausea with the fever","cannot keep antibiotics down"],
+    }),
+    ("{loc} laceration — {s1} — {s2}", {
+        "loc": ["Forehead","Lip","Chin","Scalp","Palm of hand"],
+        "s1": ["gaping about 2cm","wound edges not coming together","bleeding controlled now"],
+        "s2": ["needs tendon assessment","occurred 4 hours ago","contaminated from outdoor fall","possible foreign body"],
+    }),
+    ("Chest discomfort rated {score}/10 — {s1} — {s2}", {
+        "score": ["6","7","5-6","6-7"],
+        "s1": ["has been coming and going for 2 days","worse with exertion","happens at rest too","woke them last night"],
+        "s2": ["troponin pending","EKG with nonspecific changes","has diabetes and smokes","vitals stable for now"],
+    }),
+    ("Headache different from usual {s1} — {s2} — {s3}", {
+        "s1": ["migraines","tension headaches","cluster headaches"],
+        "s2": ["postural component","worse lying flat","onset more sudden than usual","associated with blurred vision"],
+        "s3": ["still photophobic despite medication","vomiting since 3am","usual treatment not working","cannot function"],
     }),
 ]
 
@@ -126,6 +234,54 @@ EN_ROUTINE_HARD = [
         "context": ["similar to usual migraines","same as previous episodes","patient recognizes pattern",
                     "started after long screen time","after skipping meals today","stress-related"],
         "s1": ["vomiting","fever","neck stiffness","vision changes","sudden onset","worst-ever quality"],
+    }),
+    ("Here for {reason} — has {condition}, {s1}", {
+        "reason": ["a prescription refill","medication renewal","a routine lab check","a follow-up appointment"],
+        "condition": ["well-controlled diabetes","managed hypertension","stable asthma","seasonal allergies"],
+        "s1": ["doing well on current medications","no new complaints","side effects minimal","fully functional at home"],
+    }),
+    ("{s1} for {dur} — {s2} — no alarming features", {
+        "s1": ["Loose stools","Constipation","Bloating after meals","Nausea","Reduced appetite"],
+        "dur": ["3 days","2 days","one week","several days"],
+        "s2": ["no blood in stool","no fever or vomiting","resolving gradually","fluids are helping"],
+    }),
+    ("{loc} rash — appeared {dur} ago — {s1}", {
+        "loc": ["Elbow","Behind the ear","Lower back","Wrist","Inner arm"],
+        "dur": ["2 days","4 days","a week"],
+        "s1": ["itchy but not spreading","no systemic symptoms","looks like contact dermatitis","improving with hydrocortisone"],
+    }),
+    ("Had a cold {dur} ago — still {s1} — {s2}", {
+        "dur": ["one week","5 days","10 days"],
+        "s1": ["has a lingering cough","has some nasal congestion","feels a little run down"],
+        "s2": ["no fever anymore","improving overall","back to work","eating and drinking normally"],
+    }),
+    ("Trouble sleeping for {dur} — {context} — {s2}", {
+        "dur": ["2 weeks","one week","10 days"],
+        "context": ["linked to recent life stress","no other symptoms","no depression screening concerns"],
+        "s2": ["feels well otherwise","wants to discuss sleep hygiene","already improving a bit"],
+    }),
+    ("Patient reports occasional {s1} — on evaluation {s2} — reassurance provided", {
+        "s1": ["palpitations","chest flutters","skipped heartbeats","pounding sensation"],
+        "s2": ["EKG normal","heart rate regular 76","no structural heart disease suspected","Holter not indicated"],
+    }),
+    ("{s1} — {dur} duration — {s2}", {
+        "s1": ["Mild ear discomfort","Sore throat getting better","Nasal congestion"],
+        "dur": ["3 days","a few days","one week"],
+        "s2": ["no fever","improving with saline spray","responds to lozenges","no significant pain"],
+    }),
+    ("Old {injury} — {s1} — wants {reason}", {
+        "injury": ["knee injury","ankle sprain","shoulder strain","wrist overuse"],
+        "s1": ["some aching occasionally","occasionally stiff in the morning","discomfort after long walks","sore after exercise"],
+        "reason": ["physiotherapy referral","advice on activity modification","discussion of pain management","review of exercises"],
+    }),
+    ("Here for {reason} — {s1}", {
+        "reason": ["annual flu shot","travel vaccinations","routine blood work","a wellness check"],
+        "s1": ["feeling completely well","no acute complaints","recent bloodwork was normal","healthy nonsmoker"],
+    }),
+    ("Recovering from {illness} — {s1} — {s2}", {
+        "illness": ["a cold","a mild stomach bug","a sinus infection","a bout of flu"],
+        "s1": ["still a little tired","slightly congested","appetite just returning","feeling 80% better"],
+        "s2": ["back to work today","no fever for 3 days","no new symptoms","eating and drinking normally"],
     }),
 ]
 
@@ -185,6 +341,52 @@ ES_URGENT_HARD = [
         "dur": ["2 dias","3 dias","desde esta manana"],
         "context": ["troponina pendiente","EKG normal por ahora","sin irradiacion","sin diaforesis","signos vitales estables"],
     }),
+    ("Vino sin poder estarse quieto — {s1} que irradia a {loc}, {s2}", {
+        "s1": ["dolor que va y viene","dolor colico","dolor constante con picos","calambre intenso"],
+        "loc": ["la ingle","el lado derecho","el muslo interno","el testiculo"],
+        "s2": ["nauseas durante todo el rato","vomito una vez en el coche","no encuentra posicion comoda","ha estado caminando por la sala"],
+    }),
+    ("Fiebre de {temp} con {s1} — {s2}", {
+        "temp": ["39.6C","39.8C","102.8F","103F","39.4C"],
+        "s1": ["escalofrios desde la manana","dolores en todo el cuerpo","sin apetito desde ayer","muy dormido todo el dia"],
+        "s2": ["puede beber liquidos","ibuprofeno lo baja un poco","sin confusion","pulmones limpios a la exploracion"],
+    }),
+    ("Dolor que {s1} — ahora {s2} — sin apetito desde {time}", {
+        "s1": ["empezo alrededor del ombligo","era difuso ayer","comenzo en el centro del abdomen","fue periumbilical primero"],
+        "s2": ["se localiza en fosa iliaca derecha","empeora con cualquier movimiento","le desperto de madrugada","esta fijo en la derecha abajo"],
+        "time": ["ayer por la manana","esta manana","la hora del almuerzo de hoy","anoche"],
+    }),
+    ("Nino {age} — {s1} durante {dur} con {s2}", {
+        "age": ["de 3 anos","de 5 anos","de 18 meses","de 7 anos","de 4 anos"],
+        "s1": ["fiebre de 39.5C","sin apetito","fiebre alta","muy irritable"],
+        "dur": ["2 dias","3 dias","desde ayer","48 horas"],
+        "s2": ["se lleva la mano a la oreja","sin panales mojados desde la manana","menos activo de lo habitual","muy lloroso"],
+    }),
+    ("Tras {trigger} — aparecio {s1} — {s2}", {
+        "trigger": ["comer en un restaurante nuevo","empezar un antibiotico nuevo","tocar un gato","ponerse una pulsera nueva"],
+        "s1": ["urticaria en pecho y brazos","labios hinchados","cara hinchada y con picor","habones grandes en la espalda"],
+        "s2": ["respira bien","garganta no aprieta","voz sin cambios","saturacion 99%"],
+    }),
+    ("Corte en {loc} — {s1} — {s2}", {
+        "loc": ["la frente","el labio","el menton","el cuero cabelludo","la palma de la mano"],
+        "s1": ["de unos 2cm abierto","los bordes no cierran solos","el sangrado ya se controlo"],
+        "s2": ["hay que valorar tendones","ocurrio hace 4 horas","herida sucia de caida en la calle","posible cuerpo extrano"],
+    }),
+    ("Molestia toracica de {score}/10 — {s1} — {s2}", {
+        "score": ["6","7","5-6","6-7"],
+        "s1": ["va y viene desde hace 2 dias","empeora con el esfuerzo","ocurre tambien en reposo","le desperto anoche"],
+        "s2": ["troponina pendiente","EKG con cambios inespecificos","tiene diabetes y fuma","constantes estables por ahora"],
+    }),
+    ("Cefalea distinta de sus {s1} habituales — {s2} — {s3}", {
+        "s1": ["migranas","cefaleas tensionales","jaquecas"],
+        "s2": ["componente postural","empeora al tumbarse","inicio mas subito de lo habitual","asociada a vision borrosa"],
+        "s3": ["sigue con fotofobia pese a medicacion","vomitando desde las 3am","tratamiento habitual no funciona","no puede funcionar"],
+    }),
+    ("Quemaron al orinar desde hace {dur} — ahora {s1} y {s2}", {
+        "dur": ["3 dias","2 dias","desde ayer"],
+        "s1": ["tiene fiebre desde esta manana","dolor lumbar desde hoy","escalofrios desde esta tarde"],
+        "s2": ["temperatura 38.8C","dolor en fosa renal","nauseas con la fiebre","no tolera los antibioticos"],
+    }),
 ]
 
 ES_ROUTINE_HARD = [
@@ -218,6 +420,44 @@ ES_ROUTINE_HARD = [
         "s1": ["fatiga","cansancio","malestar general","debilidad leve","somnolencia"],
         "char": ["mejora con reposo","cede con vitaminas","ha mejorado esta semana","es habitual en el","es habitual en ella"],
         "context": ["sin fiebre","sin perdida de peso","analisis recientes normales","sin linfadenopatias","exploracion normal","sin cambios recientes"],
+    }),
+    ("Aqui para {reason} — tiene {condition}, {s1}", {
+        "reason": ["renovar receta","control de laboratorio","revision rutinaria","cita de seguimiento"],
+        "condition": ["diabetes bien controlada","hipertension manejada","asma estable","alergias estacionales"],
+        "s1": ["va bien con la medicacion actual","sin nuevas quejas","efectos secundarios minimos","totalmente funcional"],
+    }),
+    ("{s1} desde hace {dur} — {s2} — sin signos de alarma", {
+        "s1": ["Deposiciones sueltas","Estreñimiento","Hinchazon tras comer","Nauseas leves","Poco apetito"],
+        "dur": ["3 dias","2 dias","una semana","varios dias"],
+        "s2": ["sin sangre en heces","sin fiebre ni vomitos","mejorando poco a poco","los liquidos ayudan"],
+    }),
+    ("Tuvo un catarro hace {dur} — todavia {s1} — {s2}", {
+        "dur": ["una semana","5 dias","10 dias","dos semanas"],
+        "s1": ["tiene tos residual","tiene algo de congestion","se siente un poco cansado","tiene el moco espeso"],
+        "s2": ["ya no tiene fiebre","mejorando en general","volvio al trabajo","come y bebe bien"],
+    }),
+    ("Dificultad para dormir desde hace {dur} — {context} — {s2}", {
+        "dur": ["2 semanas","una semana","10 dias"],
+        "context": ["relacionado con estres reciente","sin otros sintomas","sin problemas de salud mental identificados"],
+        "s2": ["por lo demas bien","quiere hablar de higiene del sueno","ya un poco mejor"],
+    }),
+    ("Refiere {s1} ocasionales — en la exploracion {s2} — tranquilizado", {
+        "s1": ["palpitaciones","aleteos en el pecho","latidos que se saltan","sensacion de latidos fuertes"],
+        "s2": ["EKG normal","FC regular de 76","sin cardiopatia estructural sospechada"],
+    }),
+    ("Recuperandose de {illness} — {s1} — {s2}", {
+        "illness": ["un catarro","un virus gastrico","una sinusitis","una gripe","una amigdalitis"],
+        "s1": ["todavia un poco cansado","algo de congestion","apetito volviendo","al 80 por ciento"],
+        "s2": ["ya volvio al trabajo","sin fiebre desde 3 dias","sin sintomas nuevos","come y bebe bien"],
+    }),
+    ("Visita por {reason} — {s1}", {
+        "reason": ["la vacuna anual de la gripe","vacunas de viaje","analitica rutinaria","chequeo de salud"],
+        "s1": ["se encuentra perfectamente bien","sin quejas agudas","analitica reciente normal","no fumador y sano"],
+    }),
+    ("Lesion vieja de {injury} — {s1} — quiere {reason}", {
+        "injury": ["rodilla","tobillo","hombro","muneca"],
+        "s1": ["algo de molestia ocasional","rigidez por las mananas","dolor tras caminar mucho","molestia tras el ejercicio"],
+        "reason": ["derivacion a fisioterapia","consejo sobre actividad","manejo del dolor","revision de ejercicios"],
     }),
 ]
 
@@ -278,6 +518,51 @@ HI_URGENT_HARD = [
         "dur": ["2 din","3 din","aaj subah se"],
         "context": ["troponin aaya nahi abhi","EKG theek hai abhi tak","kahin nahi jaata dard","pasina nahi","vital signs theek hain"],
     }),
+    ("Chal nahi pa raha tha — {s1} {loc} mein, {s2}", {
+        "s1": ["lehre lete dard","uthne baithne par dard","aate jaate dard","achanak dard"],
+        "loc": ["kamar","pet ke daahine taraf","peeth mein","nikaah ke paas"],
+        "s2": ["ek baar ulti bhi hui","pasina aa gaya","koi aaramdaayak jagah nahi mili","aate waqt bhi halchal machaa raha tha"],
+    }),
+    ("{temp} bukhar ke saath {s1} — {s2}", {
+        "temp": ["39.6C","102.8F","103F","39.8C"],
+        "s1": ["subah se thithura raha","pura badan dard kar raha","kal se kuch khaya nahi","zyada der soya"],
+        "s2": ["paani pee sakta hai","ibuprofen se thoda utara","ghabrahat nahi","saans theek hai"],
+    }),
+    ("Naabl ke paas dard tha — ab {s1} — {time} se kuch khaaya nahi", {
+        "s1": ["neeche daahini taraf aa gaya hai","aur bhi tez ho gaya hai","chalane se bhi takleef hoti hai","raat ko uthaya tha"],
+        "time": ["kal subah","aaj subah","dopahar se","raat se"],
+    }),
+    ("{age} bachcha — {s1} {dur} se {s2} ke saath", {
+        "age": ["3 saal ka","5 saal ka","18 mahine ka","7 saal ki"],
+        "s1": ["39.5 bukhar","kuch khaa nahi raha","tez bukhar hai","bahut chidchida hai"],
+        "dur": ["2 din","3 din","kal se","48 ghante"],
+        "s2": ["kaan khujaa raha hai","subah se diaper nahi bheeega","kam khel raha hai","bahut rona"],
+    }),
+    ("{trigger} ke baad — {s1} aaya — {s2}", {
+        "trigger": ["naye restaurant mein khaane ke baad","nayi antibiotic lene ke baad","billi ko chhune ke baad","nayi bracelet pehan ne ke baad"],
+        "s1": ["poore seene aur baahon par daane","honth sujan gaye","chehra sujan gaya aur khujli","peeth par bade daane"],
+        "s2": ["saans theek hai","gala nahi daba","awaaz theek hai","oxygen 99 percent"],
+    }),
+    ("{loc} par ghav — {s1} — {s2}", {
+        "loc": ["Maathathe pe","Honth pe","Thoddi pe","Sar pe","Haath ki hatheli pe"],
+        "s1": ["karib 2cm khula hua hai","kinare nahi aa rahe","khoon band ho gaya abhi"],
+        "s2": ["tendons check karni parengi","4 ghante pehle hua tha","bahar girne se gandaa ho gaya","kuch andar ho sakta hai"],
+    }),
+    ("Seene mein {score}/10 ki takleef — {s1} — {s2}", {
+        "score": ["6","7","5-6","6-7"],
+        "s1": ["2 din se aata jaata hai","mehnat karne par badhtaa hai","aaram mein bhi hota hai","raat ko uthaya"],
+        "s2": ["troponin abhi aaya nahi","EKG mein kuch alag hai","diabetes hai aur sigaret bhi peeta","vital signs theek abhi"],
+    }),
+    ("Pehle se alag sardard — {s1} se — {s2} — {s3}", {
+        "s1": ["pehle ke migraines","tension headaches","normal sardard"],
+        "s2": ["let ne par takleef badh jaati hai","achanak zyada tez shuru hua","dhundhla dikhne laga"],
+        "s3": ["dawa ke baad bhi roshni se takleef","subah 3 baje se ulti","usual dawa kaam nahi ki","kuch kaam nahi kar pa raha"],
+    }),
+    ("Peshab karte waqt jalan {dur} se — ab {s1} aur {s2}", {
+        "dur": ["3 din","2 din","kal se"],
+        "s1": ["subah se bukhar aa gaya","aaj se kamar mein dard","shaam se kaanpna shuru"],
+        "s2": ["temperature 38.8C","peeth mein dabane par dard","bukhar ke saath ulti","antibiotic haazam nahi ho rahi"],
+    }),
 ]
 
 HI_ROUTINE_HARD = [
@@ -302,10 +587,68 @@ HI_ROUTINE_HARD = [
                     "dhadkan 78 aur regular","haath ke neechle hisse par sone se tha ab theek","tension headache ibuprofen se theek hua",
                     "anxiety se related koi objective finding nahi"],
     }),
-    ("{qual} sardard — {context} — koi {s1} nahi", {
-        "qual": ["Halka","Sust","Tension wala","Dono taraf halka","Aage ki taraf"],
-        "context": ["pehle bhi aise hota tha","baar baar aisa hota hai","zyada der screen dekhne se","khaana chhodne se"],
+    ("Sardard — {context} — koi {s1} nahi", {
+        "context": ["pehle bhi aise hota tha","baar baar aisa hota hai","zyada der screen dekhne se","khaana chhodne se","tension ki wajah se"],
         "s1": ["ulti","bukhar","gardan mein akadahat","najar mein badlaav","achanak shuru","jeevan ka sabse bada"],
+    }),
+    ("Dawa ke liye aaye hain — {condition} hai, {s1}", {
+        "condition": ["controlled BP","theek se manage diabetes","mausami allergy","halki eczema","stable asthma"],
+        "s1": ["abhi dawa se sab theek hai","koi nayi shikayat nahi","side effects nahi hain","poori tarah se normal life jee rahe hain"],
+    }),
+    ("{s1} {dur} se — {s2} — koi warning signs nahi", {
+        "s1": ["Loose stool","Kabz","Khaane ke baad fulaahat","Thodi si matli","Kam bhookh"],
+        "dur": ["3 din","2 din","ek hafte","kuch dinon"],
+        "s2": ["stool mein khoon nahi","bukhar ya ulti nahi","dheere dheere theek ho raha","paani se aaraami ho raha"],
+    }),
+    ("Ek hafte pehle sardi thi — abhi bhi {s1} — {s2}", {
+        "dur": ["ek hafte","5 din","10 din","do hafte"],
+        "s1": ["thodi khansi hai","thodi naak band hai","thaka hua feel hota hai","balgam thodi moti hai"],
+        "s2": ["bukhar ab nahi hai","dhire dhire theek ho raha","kaam par gaya tha aaj","kha pi raha theek se"],
+    }),
+    ("Neend nahi aa rahi {dur} se — {context} — {s2}", {
+        "dur": ["do hafte","ek hafte","10 din"],
+        "context": ["tension ki wajah se","koi aur lakshan nahi","mental health screening normal"],
+        "s2": ["baaki sab theek hai","neend ki aadat ke baare mein poochna tha","thoda better ho raha hai"],
+    }),
+    ("Kabhi kabhi {s1} hoti hai — jaanch mein {s2} — reassurance di gayi", {
+        "s1": ["dhadkan tez","seene mein flutter","dhadkan miss hoti","dil ki awaaz"],
+        "s2": ["EKG normal","heart rate 76 aur regular","koi heart disease nahi laga","Holter ki zaroorat nahi"],
+    }),
+    ("Sardi ke baad bhi {s1} abhi — {dur} ho gaye — {s2}", {
+        "s1": ["khansi hai","naak band hai","thaka hua feel hota hai"],
+        "dur": ["ek hafte","5 din","10 din"],
+        "s2": ["bukhar nahi ab","better ho raha hai dhire dhire","kaam par wapas gaya","khana peena normal"],
+    }),
+    ("{reason} ke liye aaye hain — {s1}", {
+        "reason": ["routine blood test","flu shot","travel vaccine","annual check-up"],
+        "s1": ["bilkul theek hain","koi nayi pareshani nahi","haali test normal tha","healthy non-smoker hain"],
+    }),
+    ("Purani {injury} ki takleef — {s1} — {reason} chahiye", {
+        "injury": ["ghutne mein chot","takhne ki moch","kandhe mein khichav","kalai ka overuse"],
+        "s1": ["thodi si takleef kabhi kabhi","subah akadahat hoti hai","zyada chalne par dard","vyayam ke baad dard"],
+        "reason": ["physiotherapy referral","exercise ki salah","dard manage karne ka tarika","exercises ki review"],
+    }),
+    ("Beemari ke baad theek ho rahe hain — {s1} — {s2}", {
+        "illness": ["sardi se","hafif vomiting se","sinus infection se","flu se"],
+        "s1": ["abhi bhi thoda thaka hua","thodi naak band","bhookh wapas aa rahi hai","80 percent better hain"],
+        "s2": ["aaj kaam par gaye","3 din se bukhar nahi","koi nayi shikayat nahi","khana pena normal hai"],
+    }),
+    ("{loc} mein {s1} jo {dur} se hai — {s2}", {
+        "loc": ["aankhon","haath mein","paaon mein","gardan mein","pet mein"],
+        "s1": ["thodi si jalan","halki khujli","halka dard","thodi si sujan","thoda akadahat"],
+        "dur": ["kal se","2 din se","3 din se","subah se","kuch ghante se"],
+        "s2": ["bilkul halka hai","chal phir sakta hai","koi numbness nahi","dheere dheere theek ho raha","roz ke kaam mein koi takleef nahi"],
+    }),
+    ("{age} mariz {reason} ke liye aaye — {condition} ka {s1} — koi nayi shikayat nahi", {
+        "age": ["60 saal ke","55 saal ki","72 saal ke","45 saal ki","68 saal ke"],
+        "reason": ["follow-up","routine check","dawa renewl","BP check","lab test"],
+        "condition": ["diabetes","BP","thyroid","asthma","allergy"],
+        "s1": ["achha control hai","dawa se theek hai","stable chal raha hai","managed hai"],
+    }),
+    ("Naak beh rahi hai aur {s1} — {type} ki tarah lag raha {context}", {
+        "s1": ["chhinkein aa rahi hain","naak band hai","aankhon se paani","aankhon mein khujli","gale mein thodi si kharaash"],
+        "type": ["mausami allergy","sardi","nasal allergy","viral infection","rhinitis"],
+        "context": ["hai — bukhar nahi","hai — roz ke kaam theek se ho rahe hain","hai — dawa se aaram","hai — seena saaf hai","hai — koi bada lakshan nahi"],
     }),
 ]
 
@@ -366,6 +709,51 @@ BN_URGENT_HARD = [
         "dur": ["dui din","tin din","shokal theke"],
         "context": ["troponin esheni ekhono","EKG thik ache ekhono porjonto","kothao jachhhe na batha","ghaam hochhe na","vital signs thik ache"],
     }),
+    ("Hathte parchhen na — {s1} {loc} e, {s2}", {
+        "s1": ["dheu khele batha","othanamte batha","aase jaoa batha","hothat batha"],
+        "loc": ["kaanghare","peter dan dike","pitthe","groyne er kaache"],
+        "s2": ["ekbar bomi hoyeche","ghaam hochhilo","kono jagay aaram nai","ashte ashte o khub koshto hochhilo"],
+    }),
+    ("{temp} jor er shathe {s1} — {s2}", {
+        "temp": ["39.6C","39.8C","102.8F","103F"],
+        "s1": ["shokal theke kaanpchhe","shara gaye batha","gotokal theke khaachhe na","beshi shuye ache"],
+        "s2": ["paani khete parchhe","paracetamol e ektu kame","ghabarani nei","shas thik ache"],
+    }),
+    ("Nabir kaache batha chilo — ekhon {s1} — {time} theke khaachhe na", {
+        "s1": ["nicher dan dike chole gechhe","aaro beshi hochhe","hathlei batha barhchhe","rat e jagiye diyechilo"],
+        "time": ["gotokal shokal","aaj shokal","dopur theke","kal raat theke"],
+    }),
+    ("{age} shishur — {s1} {dur} dhore {s2} er shathe", {
+        "age": ["3 bochhorer","5 bochhorer","18 maser","7 bochhorer"],
+        "s1": ["39.5C jor","kichhu khachhe na","beshi jor","khub chidchide"],
+        "dur": ["dui din","tin din","gotokal theke","48 ghanta"],
+        "s2": ["kan khujchhe","shokal theke diaper bhejeni","kom khelte parchhe","khub kaadchhe"],
+    }),
+    ("{trigger} er pore — {s1} berolo — {s2}", {
+        "trigger": ["notun restaurant e kheye","notun antibiotic shuru kore","beral chhuye","notun bracelet pore"],
+        "s1": ["buke o bahute daana","thoth fuley gechhe","mukh fuley chulkani hochhe","pitthe boro daana"],
+        "s2": ["shas thik achhe","gola chaapchhe na","awaaz badlaay ni","oxygen 99 percent"],
+    }),
+    ("{loc} e kata — {s1} — {s2}", {
+        "loc": ["Kopoley","Thothey","Thutey","Mathay","Haater taluye"],
+        "s1": ["karib 2cm khola ache","kinara aste parchhe na","rokto ekhon bondho"],
+        "s2": ["tendon dekha dorkar","4 ghanta aage hoyeche","baire pore laga gandha ghoto","andar kichu thakte pare"],
+    }),
+    ("Buke {score}/10 er koshto — {s1} — {s2}", {
+        "score": ["6","7","5-6","6-7"],
+        "s1": ["dui din dhore aase jaay","parishram e barhchhe","bistrante o hochhe","kal raat e jagiye diyechilo"],
+        "s2": ["troponin esheni","EKG e kichhu alaada","diabetes ache o cigarette khaay","vital signs ekhon thik"],
+    }),
+    ("Saadharon mathabathar cheye alag — {s1} — {s2} — {s3}", {
+        "s1": ["migraine theke","tension headache theke","cluster headache theke"],
+        "s2": ["shuyey pore barhchhe","beshi hothat shuru hoyeche","chhondho dhundho hochhe"],
+        "s3": ["dawa diye o aloy koshto hochhe","rat 3ta theke bomi hochhe","usual dawa kaaje lagchhe na","kichhu karte parchhe na"],
+    }),
+    ("Proshrab e jvala {dur} dhore — ekhon {s1} o {s2}", {
+        "dur": ["tin din","dui din","gotokal theke"],
+        "s1": ["shokal theke jor"],
+        "s2": ["38.8C temperature","pitthe chaap dilei batha","jorer shathe bomi","antibiotic khete parchhe na"],
+    }),
 ]
 
 BN_ROUTINE_HARD = [
@@ -390,10 +778,72 @@ BN_ROUTINE_HARD = [
                     "heart rate 78 o regular","ghume hate shuye thaka theke jhimjhim ekhon theek",
                     "tension mathabatha paracetamol e kome gechhe","anxiety theke vital signs thik"],
     }),
-    ("{qual} mathabatha — {context} — kono {s1} nei", {
-        "qual": ["Halka","Sust","Tension er","Dui dike halka","Shmukhe"],
-        "context": ["ageo erokomo hoto","baar baar hochhe","onek kkhhon screen er shamne"],
+    ("Mathabatha — {context} — kono {s1} nei", {
+        "context": ["ageo erokomo hoto","baar baar hochhe","onek kkhhon screen er shamne","bhaater por hochhe","chorchap theke"],
         "s1": ["bomi","jor","gharer shoktohat","drishti badlaav","hothat shuru","jiboner shobcheye kharap"],
+    }),
+    ("Dawa neoar jonno eshechen — {condition} ache, {s1}", {
+        "condition": ["niyontrito BP","theek manage diabetes","mausumi allergy","stable asthma","halka eczema"],
+        "s1": ["ekhon dawa te shob thik achhe","kono notun obhiyog nei","side effect nei","purono jibon er moto chalachhe"],
+    }),
+    ("{s1} {dur} dhore — {s2} — kono bhoyonkor laakhhon nei", {
+        "s1": ["Patolaa potkhana","Koshthokaththinyo","Khabar kheyey fulanor bhab","Halka bomi bomi bhab"],
+        "dur": ["tin din","dui din","ek shaptah","koyekdin"],
+        "s2": ["potkhana te rokto nei","jor o bomi nei","aaste aaste bhalo hochhe","paani kheye shahayta hochhe"],
+    }),
+    ("Ek shaptah aage thanda legechilo — ekhon o {s1} — {s2}", {
+        "s1": ["kashi achhe","naak bondho","thaka thaka lagchhe","balgom mota"],
+        "s2": ["jor nei ekhon","dhire dhire sharte","kaj e gechhe","khaachhe o khachhe thik"],
+    }),
+    ("{dur} dhore ghum hochhe na — {context} — {s2}", {
+        "dur": ["dui shaptah","ek shaptah","dosh din"],
+        "context": ["tension er karone","kono aaro laakhhon nei","mental health screening thik"],
+        "s2": ["baki shob thik achhe","ghum er obbhas nie kotha bolte chaichen","ektu bhalo laagchhe"],
+    }),
+    ("Maje shaaje {s1} hochhe — parikkkhay {s2} — nishchinto kora hoyeche", {
+        "s1": ["dhukdhuki","buke flutter","dhukdhuki miss","jore dhukdhuki"],
+        "s2": ["EKG normal","heart rate 76 o regular","kono hridrogi shondeho nei"],
+    }),
+    ("Thanda lagaar pore o {s1} — {dur} — {s2}", {
+        "s1": ["kashi achhe","naak bondho","thaka thaka lagchhe"],
+        "dur": ["ek shaptah holo","paanch din holo","dosh din holo"],
+        "s2": ["jor nei ekhon","sobai dhire bhalo hochhe","kaj e phireche","khaachhe khaachhe thik"],
+    }),
+    ("{reason} er jonno eshechen — {s1}", {
+        "reason": ["routine blood test","flu shot","travel vaccine","annual checkup"],
+        "s1": ["shompurno shushtho achhen","kono notun shomoshsha nei","shesh labtest normal chilo","dhumpaan korhen na shustho"],
+    }),
+    ("Purono {injury} er somoshha — {s1} — {reason} chai", {
+        "injury": ["ghutute r chot","ghorer moch","kandher khich","kobji r overuse"],
+        "s1": ["maje maje halka batha","shokalei shothokaththinyo","onek hathle batha","byaaam er pore batha"],
+        "reason": ["physio referral","kaj modify er poromorsh","batha manage er upay","exercise review"],
+    }),
+    ("Shusthyo hochhe — {s1} — {s2}", {
+        "illness": ["thanda laaga","halka pet er somoshha","sinus infection","flu"],
+        "s1": ["ektu thaka thaka","halka naak bondho","khidey phirche","80 percent bhalo"],
+        "s2": ["aaj kaj e phireche","3 din jor nei","notun laakhhon nei","khaachhe khaachhe normal"],
+    }),
+    ("{loc} e {s1} je {dur} dhore achhe — {s2}", {
+        "loc": ["chokhe","haate","paaye","ghare","pete"],
+        "s1": ["halka jvala","thoda chulkani","halka batha","thoda fulon","halka akodh"],
+        "dur": ["gotokal theke","dui din dhore","tin din dhore","shokal theke","koyekhonta dhore"],
+        "s2": ["khub halka","hathte cholta parchhe","kono numbness nei","aaste aaste bhalo hochhe","protidin er kaaj hochhe"],
+    }),
+    ("{age} rogi {reason} er jonno eshechilen — {condition} er {s1} — kono notun obhiyog nei", {
+        "age": ["60 bochhorer","55 bochhorer","72 bochhorer","45 bochhorer","68 bochhorer"],
+        "reason": ["follow-up","routine check","dawa renewal","BP dekhano","lab test"],
+        "condition": ["diabetes","BP","thyroid","asthma","allergy"],
+        "s1": ["bhalo niyontron achhe","dawa te theek achhe","stable ache","manage hochhe"],
+    }),
+    ("Naak die paani porhchhe o {s1} — {type} er moto laagchhe — {context}", {
+        "s1": ["hachhi hochhe","naak bondho","chokh theke paani","chokhe chulkani","gole thoda khakharahan"],
+        "type": ["mausumi allergy","shardi","nasal allergy","viral infection","rhinitis"],
+        "context": ["jor nei","protidin er kaj thik hochhe","dawa te aaram","buk shaffo","boro kono laakhhon nei"],
+    }),
+    ("{dur} dhore {s1} — bhalo hochhe — {s2}", {
+        "dur": ["koyekdin","ek shaptah","5 din","dui shaptah"],
+        "s1": ["thanda legechilo","halka stomach er shomoshha chilo","sinus er shomoshha chilo","flu legechilo"],
+        "s2": ["aaj kaj e phireche","tin din jor nei","notun laakhhon nei","khaachhe daachhe normal"],
     }),
 ]
 
@@ -402,32 +852,30 @@ BN_ROUTINE_HARD = [
 # ═══════════════════════════════════════════════════════════════
 
 EN_EMERGENCY = [
-    ("{sev} chest pain radiating to {loc} with {s1} and {s2}", {
-        "sev": ["Severe","Acute","Crushing","Excruciating","Intense","Sudden severe","Extreme"],
+    ("Chest pain radiating to {loc} — {s1} and {s2}", {
         "loc": ["the left arm","the jaw","the back","the left shoulder","both arms","the neck","the right arm"],
         "s1": ["sweating","cold sweats","diaphoresis","profuse sweating","clammy skin","pallor"],
         "s2": ["nausea","vomiting","shortness of breath","dizziness","weakness","extreme fatigue","palpitations"],
     }),
-    ("Sudden {q} loss of consciousness, {r}", {
+    ("Loss of consciousness — {q} episode, {r}", {
         "q": ["complete","unexplained","witnessed","unwitnessed","prolonged","brief"],
         "r": ["unresponsive to stimulation","not responding to verbal commands","unable to be aroused",
               "found collapsed on floor","no response to pain stimulus","eyes fixed and unresponsive"],
     }),
-    ("{sev} difficulty breathing with {s1} and {s2}", {
-        "sev": ["Severe","Extreme","Critical","Acute","Life-threatening","Progressive"],
+    ("Difficulty breathing — {s1} and {s2}", {
         "s1": ["inability to complete sentences","speaking in single words","lips turning blue",
                "oxygen saturation critically low","use of accessory muscles","visible respiratory distress"],
         "s2": ["cyanotic fingertips","audible stridor","respiratory rate above 30","severe hypoxia",
                "paradoxical breathing","tracheal deviation"],
     }),
-    ("Severe allergic reaction with {s1} and {s2} after {trigger} exposure", {
+    ("Allergic reaction after {trigger} — {s1} and {s2}", {
         "s1": ["throat swelling","tongue angioedema","facial swelling","airway compromise","uvula swelling"],
         "s2": ["unable to swallow","unable to breathe","blood pressure crashing","widespread urticaria","anaphylactic shock"],
         "trigger": ["bee sting","peanut ingestion","shellfish","penicillin","latex","contrast dye","wasp sting","aspirin"],
     }),
-    ("Sudden {q} headache described as {desc} with {s1}", {
-        "q": ["severe","thunderclap","explosive","worst-ever","maximal-intensity"],
-        "desc": ["worst of life","never experienced before","a lightning bolt","an explosion in the head","10 out of 10"],
+    ("Headache described as {desc} — onset {onset} — with {s1}", {
+        "desc": ["worst of life","never experienced before","a lightning bolt in the head","10 out of 10","like an explosion"],
+        "onset": ["sudden","thunderclap","instantaneous","over seconds","out of nowhere"],
         "s1": ["neck stiffness","photophobia and vomiting","altered consciousness","neck rigidity","fever and rash"],
     }),
     ("Stroke symptoms: {s1}, {s2} and {s3}", {
@@ -557,8 +1005,7 @@ EN_URGENT = [
 ]
 
 EN_ROUTINE = [
-    ("{qual} cough for {dur} with {s1}", {
-        "qual": ["Mild","Dry","Productive","Intermittent","Persistent mild","Low-grade","Occasional"],
+    ("Cough for {dur} — {s1}", {
         "dur": ["3 days","4 days","5 days","one week","a few days","2 days","6 days"],
         "s1": ["no fever","no shortness of breath","mild throat irritation","clear sputum","no systemic symptoms",
                "improving gradually","no wheezing","mild congestion","resolving spontaneously"],
@@ -568,8 +1015,7 @@ EN_ROUTINE = [
         "loc": ["forearm","upper arm","lower leg","back","neck","abdomen"],
         "s1": ["no systemic symptoms","mild pruritus","no fever","stable for 2 days","not spreading"],
     }),
-    ("{qual} lower back pain after {cause} improving with {treatment}", {
-        "qual": ["Mild","Dull","Aching","Mild to moderate"],
+    ("Lower back pain after {cause}, getting better with {treatment}", {
         "cause": ["lifting heavy objects","prolonged sitting","gardening","bending","exercise"],
         "treatment": ["rest","lying down","over-the-counter ibuprofen","heat application","change in position"],
     }),
@@ -577,9 +1023,8 @@ EN_ROUTINE = [
         "s1": ["sneezing","nasal congestion","post-nasal drip","watery eyes","itchy eyes","mild cough"],
         "type": ["seasonal allergies","allergic rhinitis","common cold","viral upper respiratory infection"],
     }),
-    ("{qual} headache responding to {treatment}", {
-        "qual": ["Mild","Tension-type","Mild frontal","Bilateral mild","Dull"],
-        "treatment": ["over-the-counter ibuprofen","paracetamol","rest in dark room","hydration","ibuprofen 400mg"],
+    ("Headache that went away with {treatment}", {
+        "treatment": ["over-the-counter ibuprofen","paracetamol","rest in a dark room","hydration","ibuprofen 400mg"],
     }),
     ("Minor {type} on {loc} that has {status}", {
         "type": ["cut","laceration","abrasion","scratch","wound"],
@@ -590,25 +1035,22 @@ EN_ROUTINE = [
         "dur": ["3 days","4 days","5 days","several days"],
         "s1": ["no vomiting","mild cramping","no blood in stool","no fever","mild abdominal discomfort"],
     }),
-    ("{qual} fatigue for {dur} with {s1}", {
-        "qual": ["Mild","Moderate","Generalized","Persistent"],
+    ("Feeling tired for {dur} — {s1}", {
         "dur": ["one week","several days","5 days","a few days"],
-        "s1": ["no other symptoms","adequate sleep","normal appetite","no fever","no weight loss"],
+        "s1": ["no other symptoms","sleeping fine","normal appetite","no fever","no weight loss"],
     }),
-    ("{qual} sore throat with {s1}", {
-        "qual": ["Mild","Scratchy","Irritating","Low-grade"],
+    ("Sore throat with {s1}", {
         "s1": ["no fever","no difficulty swallowing","no exudate","no lymphadenopathy","mild discomfort only"],
     }),
     ("Insomnia for {dur} with {s1}", {
         "dur": ["one week","several nights","5 days","over a week"],
         "s1": ["no other symptoms","stress-related","no medication side effects","otherwise feeling well","affecting daily function mildly"],
     }),
-    ("{qual} nausea for {dur} without {s1}", {
-        "qual": ["Mild","Intermittent","Low-grade"],
+    ("Nausea for {dur} — no {s1}", {
         "dur": ["one day","2 days","several hours"],
         "s1": ["vomiting","diarrhea","fever","significant pain","systemic symptoms"],
     }),
-    ("Mild {type} rash on {loc} present for {dur}", {
+    ("{type} rash on {loc} present for {dur}", {
         "type": ["itchy","dry","scaly","red","pink"],
         "loc": ["hands","feet","neck","chest","back"],
         "dur": ["2 days","3 days","one week","several days"],
@@ -616,7 +1058,7 @@ EN_ROUTINE = [
     ("Request for routine {type} refill with no acute complaints", {
         "type": ["blood pressure medication","diabetes medication","thyroid medication","asthma inhaler","allergy medication"],
     }),
-    ("Mild {type} pain rated {score} out of 10 not interfering with {activity}", {
+    ("{type} pain rated {score} out of 10, not interfering with {activity}", {
         "type": ["knee","shoulder","wrist","hip","neck","elbow"],
         "score": ["2","3","2-3","3-4"],
         "activity": ["daily activities","sleep","walking","work"],
@@ -632,8 +1074,7 @@ EN_ROUTINE = [
 # ═══════════════════════════════════════════════════════════════
 
 ES_EMERGENCY = [
-    ("{sev} dolor en el pecho que se irradia hacia {loc} con {s1} y {s2}", {
-        "sev": ["Dolor intenso","Dolor aplastante","Dolor severo","Dolor agudo","Dolor insoportable","Presion intensa"],
+    ("Dolor en el pecho que se irradia hacia {loc} con {s1} y {s2}", {
         "loc": ["el brazo izquierdo","la mandibula","la espalda","el hombro izquierdo","ambos brazos","el cuello"],
         "s1": ["sudoracion profusa","sudoracion fria","diaforesis","palidez marcada"],
         "s2": ["nauseas","vomitos","dificultad para respirar","mareos","debilidad extrema"],
@@ -643,19 +1084,18 @@ ES_EMERGENCY = [
         "r": ["sin respuesta a estimulos","sin respuesta a llamados verbales","no puede ser despertado",
               "encontrado en el suelo","sin respuesta al dolor"],
     }),
-    ("{sev} dificultad para respirar con {s1} y {s2}", {
-        "sev": ["Severa","Extrema","Critica","Aguda","Progresiva"],
+    ("Dificultad para respirar — {s1} y {s2}", {
         "s1": ["incapacidad para terminar oraciones","solo puede decir palabras sueltas","labios azulados","saturacion de oxigeno muy baja"],
         "s2": ["cianosis en dedos","estridor audible","frecuencia respiratoria muy alta","uso de musculos accesorios"],
     }),
-    ("Reaccion alergica grave con {s1} y {s2} tras exposicion a {trigger}", {
+    ("Reaccion alergica tras {trigger} — {s1} y {s2}", {
         "s1": ["hinchazon de garganta","angioedema lingual","hinchazon facial","compromiso de la via aerea"],
         "s2": ["imposibilidad de deglutir","imposibilidad de respirar","presion arterial en descenso","urticaria generalizada"],
         "trigger": ["picadura de abeja","mani","mariscos","penicilina","latex","medio de contraste","aspirina"],
     }),
-    ("Dolor de cabeza {q} descrito como {desc} con {s1}", {
-        "q": ["severo","explosivo","el peor de la vida","de inicio subito","tipo trueno"],
-        "desc": ["el peor de su vida","nunca antes experimentado","una explosion en la cabeza","intensidad maxima"],
+    ("Cefalea descrita como {desc} — inicio {onset} — con {s1}", {
+        "desc": ["la peor de su vida","nunca habia sentido algo asi","una explosion en la cabeza","intensidad maxima"],
+        "onset": ["subito","de golpe","instantaneo","en segundos","sin aviso"],
         "s1": ["rigidez de nuca","fotofobia y vomitos","alteracion de conciencia","fiebre y erupcion"],
     }),
     ("Sintomas de accidente cerebrovascular: {s1}, {s2} y {s3}", {
@@ -786,8 +1226,7 @@ ES_URGENT = [
 ]
 
 ES_ROUTINE = [
-    ("Tos {qual} durante {dur} con {s1}", {
-        "qual": ["leve","seca","productiva","intermitente","persistente leve","ocasional","escasa"],
+    ("Tos durante {dur} con {s1}", {
         "dur": ["3 dias","4 dias","5 dias","una semana","varios dias","2 dias","6 dias","10 dias"],
         "s1": ["sin fiebre","sin dificultad respiratoria","leve irritacion de garganta","flema clara",
                "sin sintomas sistemicos","mejorando progresivamente","sin sibilancias","congestion leve"],
@@ -797,8 +1236,7 @@ ES_ROUTINE = [
         "loc": ["antebrazo","brazo","pierna","espalda","cuello","abdomen"],
         "s1": ["sin sintomas sistemicos","leve prurito","sin fiebre","estable desde hace 2 dias","no se extiende"],
     }),
-    ("Dolor lumbar {qual} tras {cause} que mejora con {treatment}", {
-        "qual": ["leve","sordo","moderado leve"],
+    ("Dolor lumbar tras {cause} que mejora con {treatment}", {
         "cause": ["levantar objetos pesados","estar sentado mucho tiempo","jardineria","flexion"],
         "treatment": ["reposo","ibuprofeno sin receta","calor local","cambio de postura"],
     }),
@@ -806,8 +1244,7 @@ ES_ROUTINE = [
         "s1": ["estornudos","congestion nasal","goteo postnasal","ojos llorosos","ojos pruriginosos"],
         "type": ["alergias estacionales","rinitis alergica","resfriado comun","infeccion viral de vias altas"],
     }),
-    ("Cefalea {qual} que responde a {treatment}", {
-        "qual": ["leve","tensional","frontal leve","bilateral leve","sorda"],
+    ("Cefalea que responde a {treatment}", {
         "treatment": ["ibuprofeno sin receta","paracetamol","reposo en habitacion oscura","hidratacion"],
     }),
     ("Herida {type} en {loc} que ya {status}", {
@@ -819,8 +1256,7 @@ ES_ROUTINE = [
         "dur": ["3 dias","4 dias","5 dias","varios dias"],
         "s1": ["sin vomitos","calambres leves","sin sangre en heces","sin fiebre","leve incomodidad abdominal"],
     }),
-    ("Cansancio {qual} durante {dur} con {s1}", {
-        "qual": ["leve","moderado","generalizado","persistente"],
+    ("Cansancio durante {dur} con {s1}", {
         "dur": ["una semana","varios dias","5 dias"],
         "s1": ["sin otros sintomas","buen apetito","sin fiebre","sin perdida de peso"],
     }),
@@ -832,8 +1268,7 @@ ES_ROUTINE = [
         "dur": ["una semana","varias noches","5 dias","mas de una semana"],
         "s1": ["sin otros sintomas","relacionado con estres","sin efectos secundarios de medicacion","por lo demas se encuentra bien"],
     }),
-    ("Nauseas {qual} durante {dur} sin {s1}", {
-        "qual": ["leves","intermitentes","moderadas"],
+    ("Nauseas durante {dur} sin {s1}", {
         "dur": ["un dia","2 dias","varias horas"],
         "s1": ["vomitos","diarrea","fiebre","dolor significativo"],
     }),
@@ -862,8 +1297,7 @@ ES_ROUTINE = [
 # ═══════════════════════════════════════════════════════════════
 
 HI_EMERGENCY = [
-    ("{sev} seene ka dard jo {loc} tak failta hai, saath mein {s1} aur {s2}", {
-        "sev": ["Tivra","Gambhir","Asahniya","Bahut tez","Bahut gambhir","Aniyantrit"],
+    ("Seene ka dard jo {loc} tak failta hai, saath mein {s1} aur {s2}", {
         "loc": ["baaye haath","jawde","peeth","baaye kandhe","dono haath","gardan"],
         "s1": ["bahut pasina","thanda pasina","diaforesis","palor"],
         "s2": ["matli","ulti","saans lene mein takleef","chakkar","bahut kamzori","behoshi jaisi feeling"],
@@ -873,13 +1307,11 @@ HI_EMERGENCY = [
         "r": ["kisi uttejana par koi pratikriya nahi","awaaz sunne par koi jawab nahi","jagaana mushkil hai",
               "zameen par gire mile","dard par bhi koi pratikriya nahi"],
     }),
-    ("{sev} saans lene mein taklif, {s1} aur {s2}", {
-        "sev": ["Bahut gambhir","Atyant","Janleva","Tivra","Badti hui"],
+    ("Saans lene mein taklif — {s1} aur {s2}", {
         "s1": ["poore vaakya bol nahi pa raha","sirf ek ek shabd bol pa raha","honth neele pad rahe hain","oxygen bahut kam hai"],
         "s2": ["ungliyan neeli pad rahi hain","saans ki awaaz aa rahi hai","bahut tez saans chal rahi hai","saans lene mein bahut mehnat"],
     }),
-    ("{sev} allergic pratikriya, {s1} aur {s2}, {trigger} ke baad", {
-        "sev": ["Gambhir","Janleva","Atyant","Bahut tez"],
+    ("{trigger} ke baad allergic pratikriya — {s1} aur {s2}", {
         "s1": ["gala sujna","jeebh sujna","chehra sujna","saans raaste mein rukaavat"],
         "s2": ["nigal nahi pa raha","saans nahi le pa raha","blood pressure girta ja raha hai","poore sharir par daane"],
         "trigger": ["makkhi ke kaatne","moongfali","machli","penicillin","latex","wasp ke daank"],
@@ -1033,8 +1465,7 @@ HI_URGENT = [
 ]
 
 HI_ROUTINE = [
-    ("{qual} khansi {dur} se {s1} ke saath", {
-        "qual": ["Halki","Sukhi","Balgam wali","Baar baar","Thodi si","Kabhi kabhi","Kam"],
+    ("Khansi {dur} se {s1} ke saath", {
         "dur": ["3 din","4 din","5 din","ek hafte","kuch dinon","2 din","6 din","10 din"],
         "s1": ["bukhar nahi","saans lene mein koi takleef nahi","gale mein thodi si jalan","saaf balgam",
                "koi systemic lakshan nahi","dheere dheere theek ho raha","koi seeti ki awaaz nahi","thodi naak band"],
@@ -1044,8 +1475,7 @@ HI_ROUTINE = [
         "loc": ["baanh par","kamar par","taang par","peethe par","gardan par","pet par"],
         "s1": ["koi aur lakshan nahi","thodi khujli","bukhar nahi","2 din se stable","failte nahi"],
     }),
-    ("{qual} kamar mein dard {cause} ke baad {treatment} se theek hota", {
-        "qual": ["Halka","Sust","Thoda sa"],
+    ("Kamar mein dard {cause} ke baad {treatment} se theek hota", {
         "cause": ["bhaari saman uthane ke baad","zyada der baithne ke baad","baagbaani ke baad"],
         "treatment": ["aaram karne se","bina nuskhe wali dawa se","garmi lagane se","posture badalne se"],
     }),
@@ -1053,8 +1483,7 @@ HI_ROUTINE = [
         "s1": ["chhinkein aa rahi hain","naak band hai","aankhon se paani","aankhon mein khujli"],
         "type": ["mausami allergy","nasal allergy","sardi jaisi","viral infection jaisi"],
     }),
-    ("{qual} sardard jo {treatment} se theek ho jaata hai", {
-        "qual": ["Halka","Tension wala","Aage ki taraf halka","Dono taraf halka"],
+    ("Sardard jo {treatment} se theek ho jaata hai", {
         "treatment": ["bina nuskhe ki dawa se","paracetamol se","andheri kamre mein aaram se","paani peene se"],
     }),
     ("{loc} par {type} jo {status}", {
@@ -1066,21 +1495,18 @@ HI_ROUTINE = [
         "dur": ["3 din","4 din","5 din","kuch dinon"],
         "s1": ["ulti nahi","thoda si ainth","stool mein khoon nahi","bukhar nahi","thodi si takleef"],
     }),
-    ("{qual} thakaan {dur} se {s1} ke saath", {
-        "qual": ["Halki","Thodi si","Saari body mein","Lagaataar"],
+    ("Thakaan {dur} se {s1} ke saath", {
         "dur": ["ek hafte","kuch dinon","5 din"],
         "s1": ["koi aur lakshan nahi","khana theek se kha raha","bukhar nahi","weight loss nahi"],
     }),
-    ("{qual} gale mein dard {s1} ke saath", {
-        "qual": ["Halka","Kharkharahat","Thoda sa irritation","Halki takleef"],
+    ("Gale mein dard {s1} ke saath", {
         "s1": ["bukhar nahi","nigalne mein koi takleef nahi","koi phulaa hissa nahi","koi ganth nahi"],
     }),
     ("Neend nahi aa rahi {dur} se {s1}", {
         "dur": ["ek hafte","kaafi raaton se","5 din","ek hafte se zyada"],
         "s1": ["koi aur takleef nahi","tension ki wajah se","dawa ka koi asar nahi","baaki sab theek hai"],
     }),
-    ("{qual} matli {dur} se bina {s1} ke", {
-        "qual": ["Halki","Baar baar","Thodi si"],
+    ("Matli {dur} se bina {s1} ke", {
         "dur": ["ek din","2 din","kuch ghante"],
         "s1": ["ulti ke","dast ke","bukhar ke","kisi bade dard ke"],
     }),
@@ -1119,8 +1545,7 @@ HI_ROUTINE = [
 # ═══════════════════════════════════════════════════════════════
 
 BN_EMERGENCY = [
-    ("{sev} buke batha {loc} porjonto chharhiye jachhhe, shathe {s1} o {s2}", {
-        "sev": ["Tibra","Gambhir","Ashoho","Khub tez","Bhoyaboh"],
+    ("Buke batha {loc} porjonto chharhiye jachhhe, shathe {s1} o {s2}", {
         "loc": ["bam hate","chomale","pitthe","bam kandhe","dui hate","ghare"],
         "s1": ["profuse ghaam hochhe","thanda ghaam hochhe","diaforesis","paandur"],
         "s2": ["bomi bomi lagchhe","bomi hochhe","shash nite koshto hochhe","matha ghurochhe","khub durbolta"],
@@ -1130,13 +1555,11 @@ BN_EMERGENCY = [
         "r": ["kono uddipanay sara dichhen na","dak shune kono uttoro nai","jagano jachhhe na",
               "morete pore pai","bedhona dileyo sara dichhen na"],
     }),
-    ("{sev} shash neoar koshto, {s1} o {s2}", {
-        "sev": ["Tibra","Otyonto","Jibonomarokar","Acute","Barhte thaka"],
+    ("Shash neoar koshto — {s1} o {s2}", {
         "s1": ["pouro baakyo bolte parchen na","ekta ekta shabd bolchen","thoth neel hochhe","oxygen khub kom"],
         "s2": ["anguler aga neel hochhe","shash neoar awaaz hochhe","shasher hare khub beshi","porashonar shorira"],
     }),
-    ("{sev} allergic protikriya, {s1} o {s2}, {trigger} er pore", {
-        "sev": ["Gambhir","Jibonomarokar","Otyonto","Bhoyaboh"],
+    ("{trigger} er pore allergic protikriya — {s1} o {s2}", {
         "s1": ["gola fuley gechhe","jib fuley gechhe","mukh fuley gechhe","shasher raasta bondho hochhe"],
         "s2": ["gilte parchhen na","shas nite parchhen na","BP pore jachhhe","shara gaaye daana"],
         "trigger": ["modhumakor kaad","badam","machh","penicillin","latex","dhoroner daank"],
@@ -1290,8 +1713,7 @@ BN_URGENT = [
 ]
 
 BN_ROUTINE = [
-    ("{qual} kashi {dur} dhore {s1} er shathe", {
-        "qual": ["Halka","Shukno","Balgom wala","Baar baar","Thoda","Kabhi kabhi","Kom"],
+    ("Kashi {dur} dhore {s1} er shathe", {
         "dur": ["tin din","char din","paanch din","ek shaptah","koyekdin","dui din","chhoy din","dosh din"],
         "s1": ["jor nei","shas neoay kono koshto nei","gole halka jvala","shaffo balgom",
                "kono systemic laakhhon nei","aaste aaste bhalo hochhe","kono seeti nei","halka naak bondho"],
@@ -1301,8 +1723,7 @@ BN_ROUTINE = [
         "loc": ["bahute","kaanghare","paaye","pitthe","ghare","pote"],
         "s1": ["kono aaro laakhhon nei","halka chulkani","jor nei","dui din dhore stable","chharhachhe na"],
     }),
-    ("{qual} pitthe batha {cause} er pore {treatment} te bhalo hochhe", {
-        "qual": ["Halka","Sust","Thoda"],
+    ("Pitthe batha {cause} er pore {treatment} te bhalo hochhe", {
         "cause": ["bhari jinish toloar pore","onek kshhon boshe thakar pore","bagan kajar pore"],
         "treatment": ["bishram niye","OTC dawa diye","goromi lagiye","posture bodole"],
     }),
@@ -1310,8 +1731,7 @@ BN_ROUTINE = [
         "s1": ["hhachhi hochhe","naak bondho","chokh theke paani","chokhe chulkani"],
         "type": ["mausumi allergy","nasal allergy","shardi","viral infection"],
     }),
-    ("{qual} mathabatha jo {treatment} te kome jay", {
-        "qual": ["Halka","Tension wali","Shomukhe halka","Dui dike halka"],
+    ("Mathabatha jo {treatment} te kome jay", {
         "treatment": ["OTC dawa te","paracetamol e","andhar ghore bishram niye","paani kheye"],
     }),
     ("{loc} te {type} je {status}", {
@@ -1323,21 +1743,18 @@ BN_ROUTINE = [
         "dur": ["tin din","char din","paanch din","koyekdin"],
         "s1": ["bomi nei","halka petbatha","potkhana te rokto nei","jor nei","halka ashonthi"],
     }),
-    ("{qual} klanti {dur} dhore {s1} er shathe", {
-        "qual": ["Halka","Madhyom","Shara gaaye","Lagaataar"],
+    ("Klanti {dur} dhore {s1} er shathe", {
         "dur": ["ek shaptah","koyekdin","paanch din"],
         "s1": ["kono aaro laakhhon nei","thikthak khaachhen","jor nei","wazan kome jaachhe na"],
     }),
-    ("{qual} gole koshto {s1} er shathe", {
-        "qual": ["Halka","Khakharo laagchhe","Halka jontrona","Thoda"],
+    ("Gole koshto {s1} er shathe", {
         "s1": ["jor nei","gilte kono koshto nei","kono fula nei","kono gantha nei"],
     }),
     ("Ghoom hochhe na {dur} dhore {s1}", {
         "dur": ["ek shaptah","onek raat","paanch din","ek shaptaher beshi"],
         "s1": ["kono aaro koshto nei","tension er karone","doroner kono prabhhab nei","baki shob theek"],
     }),
-    ("{qual} bomi bomi bhab {dur} dhore bina {s1} e", {
-        "qual": ["Halka","Baar baar","Madhyom"],
+    ("Bomi bomi bhab {dur} dhore bina {s1} e", {
         "dur": ["ek din","dui din","koyekhonta"],
         "s1": ["bomi te","dast e","jore te","baro batha te"],
     }),
