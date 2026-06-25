@@ -118,6 +118,31 @@ EN_EMERGENCY_HARD = [
         "s2": ["sudden sharp pain right side of abdomen","collapsed in the bathroom","BP 78/50 on arrival"],
         "s3": ["referred shoulder-tip pain","abdomen rigid and tender","HR 132 and dropping BP","peritoneal signs on exam"],
     }),
+    # Cross-vocabulary: Routine-sounding language (refill / follow-up / feels fine) but IS Emergency
+    ("Calling to {reason} — mentioned during call that {s1} started {onset}", {
+        "reason": ["refill metoprolol","schedule a follow-up","ask about lab results","update insurance information","renew a prescription"],
+        "s1": ["right side of face is drooping","suddenly cannot lift the right arm","speech has been slurred","left side of body feels numb and heavy","vision went blurry in one eye and stayed that way"],
+        "onset": ["this morning","about 2 hours ago","after getting up today","after lunch","an hour ago"],
+    }),
+    ("Follow-up for {chronic} — patient feels fine today but {s1} and {s2}", {
+        "chronic": ["well-controlled hypertension","diabetes management","routine blood pressure check","medication review","asthma follow-up"],
+        "s1": ["BP reads 265/145","glucose 640 and patient now confused","oxygen 82% on room air","HR 172 on monitor","lactic acid returned at 5.1"],
+        "s2": ["patient minimizing symptoms","patient insisting it is their normal","patient wanting to leave","patient attributing it to stress","patient unaware of the severity"],
+    }),
+    ("Patient came in for prescription renewal — while waiting in triage {s1} and {s2}", {
+        "s1": ["developed slurred speech","right arm became suddenly weak","face began to droop on one side","could no longer form words correctly","stood up and immediately fell to one side"],
+        "s2": ["denies any problem","says it will probably pass","wants to go home","thinks it is just tiredness","not concerned"],
+    }),
+    ("Here for a {reason} — routine in every way except {s1} and {s2}", {
+        "reason": ["blood pressure check","medication refill","post-op visit","follow-up appointment","annual review"],
+        "s1": ["oxygen saturation 81% on arrival","BP 240/150 with new headache","glucose 720 and altered mental status","HR 160 and diaphoretic"],
+        "s2": ["patient minimizing","patient asymptomatic but numbers critical","patient refuses oxygen","needs immediate intervention"],
+    }),
+    ("Mild {complaint} — patient says probably nothing — but on assessment {s1} and {s2}", {
+        "complaint": ["pressure under the breastbone","discomfort across the upper back","ache in the jaw since this morning","heaviness in the left arm since breakfast"],
+        "s1": ["EKG shows ST elevation in multiple leads","troponin 4.8","BP 84/50 and diaphoretic","oxygen 86% and using accessory muscles"],
+        "s2": ["patient remains calm and denies urgency","patient asks to go back to waiting room","patient wants to finish paperwork first","patient not grasping the severity"],
+    }),
 ]
 
 EN_URGENT_HARD = [
@@ -282,6 +307,30 @@ EN_ROUTINE_HARD = [
         "illness": ["a cold","a mild stomach bug","a sinus infection","a bout of flu"],
         "s1": ["still a little tired","slightly congested","appetite just returning","feeling 80% better"],
         "s2": ["back to work today","no fever for 3 days","no new symptoms","eating and drinking normally"],
+    }),
+    # Cross-vocabulary: Emergency-sounding words (chest pain / stroke / heart attack / SOB) but IS Routine
+    ("{event} — fully recovered — presenting now for {reason}", {
+        "event": ["Heart attack 5 years ago, stent placed, fully recovered","Stroke three years ago with complete neurological recovery","Pulmonary embolism four years ago, off anticoagulation for two years","Cardiac arrest 6 years ago, ICD in place, no shocks since"],
+        "reason": ["annual cardiac follow-up","medication refill","lab work review","wellness check and prescription renewal"],
+    }),
+    ("Chest pain — started {onset} after {trigger} — {finding}", {
+        "onset": ["immediately","within a few minutes","right after"],
+        "trigger": ["lifting heavy boxes","vigorous exercise","a prolonged coughing fit","a fall directly onto the chest","a strenuous yoga session"],
+        "finding": ["tender on palpation at the exact same spot","completely reproducible by pressing on the rib","no shortness of breath and no radiation and vitals normal","clearly musculoskeletal in character, no cardiac features"],
+    }),
+    ("Experienced chest tightness and difficulty breathing — {resolved} — {dx}", {
+        "resolved": ["resolved within 20 minutes on its own","went away after sitting down for 15 minutes","completely gone by the time patient arrived","subsided before EMS arrived"],
+        "dx": ["recognized as panic attack by patient who has history of anxiety","consistent with exercise-induced bronchospasm previously diagnosed","anxiety-related confirmed by normal EKG and oxygen 99%","hyperventilation episode, CO2 corrected on arrival"],
+    }),
+    ("Stroke symptoms {ago} — full recovery documented — now here for {reason}", {
+        "ago": ["three years ago","four years ago","5 years ago","in 2019","in 2020"],
+        "reason": ["annual neurology follow-up","prescription refill","driving medical clearance","routine blood pressure check","routine INR monitoring"],
+    }),
+    ("Severe episode of {s1} last {when} — now {status} — wants {reason}", {
+        "s1": ["difficulty breathing","chest pain","racing heart","dizziness and near-fainting"],
+        "when": ["Tuesday","Thursday","last week","on Monday","a week ago"],
+        "status": ["completely asymptomatic","back to baseline","fully resolved","feeling 100%","feeling totally normal"],
+        "reason": ["reassurance","documentation for work","anxiety therapy referral","chart clarification","follow-up as advised"],
     }),
 ]
 
